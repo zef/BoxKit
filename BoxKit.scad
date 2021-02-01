@@ -1,18 +1,23 @@
 
 // https://github.com/Irev-Dev/Round-Anything
 include <Round-Anything/polyround.scad>
+include <Round-Anything/MinkowskiRound.scad>
 
 // https://github.com/revarbat/BOSL/wiki
 include <BOSL/constants.scad>
 use <BOSL/transforms.scad>
+use <BOSL/shapes.scad>
 
 stockThickness = 3;
 wallThickness = 1.2;
 clearance = 0.0;
 height = 12;
 sideLength = 20;
-insideHeight = 0;
 
+// this affects the bottom corner piece only
+// Instead of leaving a completely flat bottom, this creates a ledge,
+// creating a more solid slot for the side walls to sit inside, and elevating the base of the entire tray by this amount
+insideHeight = 0;
 
 slotThickness = stockThickness + clearance;
 totalWall = (wallThickness * 2) + slotThickness;
@@ -20,23 +25,44 @@ totalWall = (wallThickness * 2) + slotThickness;
 outsideCornerRound = 1;
 edgeCornerRound = 1;
 
+// interlock = true;
+
 module slot() {
     translate([wallThickness, wallThickness, wallThickness])
     cube([slotThickness, sideLength, height]);
 }
 
-module bottom_corner() {
+module bottom_corner_triangle_shape() {
+    polygon(
+        polyRound([
+            [0,0, outsideCornerRound],
+            [0, sideLength, edgeCornerRound],
+            [totalWall, sideLength, edgeCornerRound],
+            [sideLength, totalWall, edgeCornerRound],
+            [sideLength, 0, edgeCornerRound]
+        ])
+    );
+}
+
+module corner_shape() {
+    polygon(
+        polyRound([
+            [0,0, outsideCornerRound],
+            [0, sideLength, edgeCornerRound],
+            [totalWall, sideLength, edgeCornerRound],
+            [totalWall, totalWall, edgeCornerRound],
+            [sideLength, totalWall, edgeCornerRound],
+            [sideLength, 0, edgeCornerRound]
+        ])
+    );
+}
+
+
+
+module bottom_corner(interlock = false) {
     difference() {
         linear_extrude(height) {
-            polygon(
-                polyRound([
-                    [0,0, outsideCornerRound],
-                    [0, sideLength, edgeCornerRound],
-                    [totalWall, sideLength, edgeCornerRound],
-                    [sideLength, totalWall, edgeCornerRound],
-                    [sideLength, 0, edgeCornerRound]
-                ])
-            );
+            bottom_corner_triangle_shape();
         }
 
         // cutout slots for panels
@@ -45,28 +71,29 @@ module bottom_corner() {
 
         // flatten out inside ledge, providing suppport for the bottom part
         translate([slotThickness, slotThickness, wallThickness + insideHeight]) cube([sideLength, sideLength, height]);
+
+        if (interlock) {
+            interlock();
+        }
     }
 }
 
 
-module top_corner() {
-    difference() {
-        linear_extrude(height) {
-            polygon(
-                polyRound([
-                    [0,0, outsideCornerRound],
-                    [0, sideLength, edgeCornerRound],
-                    [totalWall, sideLength, edgeCornerRound],
-                    [totalWall, totalWall, edgeCornerRound],
-                    [sideLength, totalWall, edgeCornerRound],
-                    [sideLength, 0, edgeCornerRound]
-                ])
-            );
-        }
+module top_corner(interlock = false) {
+    union() {
+        difference() {
+            linear_extrude(height) {
+                corner_shape();
+            }
 
-        slot();
-        zrot(270) left(totalWall) slot();
-    };
+            slot();
+            zrot(270) left(totalWall) slot();
+        };
+        
+        if (interlock) {   
+            interlock();
+        }
+    }
 }
 
 module 3_way() {
@@ -83,12 +110,91 @@ module 4_way() {
     }
 }
 
-bottom_corner();
+module back_plate(side = 10) {
+    
+    plate_height = side * .6;
+    
+    mirror_copy([0,0,1], 0, [0,0,totalWall/2])
+    difference() {  
+        yrot(90) xflip() left(plate_height)
+        linear_extrude(side) polygon(
+            polyRound([
+                [0,0, 0],
+                [0, wallThickness, 2],
+                [plate_height, wallThickness, 4],
+                [plate_height, wallThickness * 4, 0],
+                [plate_height + totalWall, wallThickness * 4, 0],
+                [plate_height + totalWall, 0, 0],
+            ], fn = 20)
+        );
 
-back(sideLength + 10) top_corner();
-back(sideLength * 3 + 20) 3_way();
-back(sideLength * 5 + 30) 4_way();
+    xrot(90, cp = [0,0,wallThickness/2])  right(side/2) forward(plate_height/1.7)  cylinder(wallThickness+.1, 4, 2, $fn = 30, center = true);
+
+    }
+
+    
+}
+
+module wall_mount() {
+    overhang = 8;
+    side = sideLength + 4;
+    
+    difference() {
+        union() {
+            linear_extrude(totalWall) {
+                polygon(
+                    polyRound([
+                        [0,0, outsideCornerRound],
+                        [0, side, edgeCornerRound],
+                        [overhang, side, edgeCornerRound],
+                        [overhang, overhang, edgeCornerRound],
+                        [side, overhang, edgeCornerRound],
+                        [side, 0, edgeCornerRound]
+                    ])
+                );
+            }
+            back_plate(side);
+        }
+            
+        // cut out slot for shelf sheet
+        translate([wallThickness*2, wallThickness*2, wallThickness]) cube([side, side, slotThickness]);        
+    };
+}
 
 
+// old cylinder idea, never tried printing
+module interlock() {
+    radius = wallThickness/3;
+    translate([totalWall / 2, totalWall / 2, 0])
+    zrot_copies([0, 90], r = totalWall/2)
+    cyl(sideLength - (totalWall*2), r=radius, fillet=radius, orient=ORIENT_X, center=false, $fn=20);
+}
+
+// protrusion from bottom corner. I like the idea but I'm not sure how to print it...
+// maybe make an interlock as a separate piece that is glued on and inserted using a couple alignment pins?
+//module interlock(scaleClearance = 1.15) {
+//    difference() {
+//        linear_extrude(wallThickness) bottom_corner_triangle_shape();
+//        translate([-.1, -.1, -.1]) scale([scaleClearance, scaleClearance, scaleClearance]) linear_extrude(wallThickness + 1) corner_shape();
+//
+//    }
+//}
+
+
+//bottom_corner(true);
+
+//top_corner(true);
+
+
+ydistribute(sideLength * 2 + 10) {
+    bottom_corner(false);
+    top_corner(false);
+//    bottom_corner(true);
+//    top_corner(true);
+    3_way();
+    4_way();
+
+    wall_mount();
+}
 
 
