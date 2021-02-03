@@ -211,8 +211,38 @@ ydistribute(sideLength * 2 + 10) {
 //    top_corner(true);
     3_way();
     4_way();
+bed_spacing = 4;
 
-    wall_mount();
+module bottom_corners() {
+    distance = (sideLength * 2) + bed_spacing;
+    ydistribute(distance)  {
+        xdistribute(distance) {
+            bottom_corner();
+            zrot(90) bottom_corner();
+        }
+
+        zrot(180) xdistribute(distance) {
+            bottom_corner();
+            zrot(90) bottom_corner();
+        }
+    }
 }
+module top_corners() {
+    distance = sideLength * 2+ totalWall;// (sideLength * 2) + (totalWall * 2) + (bed_spacing * 2);
+    zrot(45) ydistribute(distance)  {
+        xdistribute(distance) {
+            top_corner();
+            zrot(90) top_corner();
+        }
+
+        zrot(180) xdistribute(distance) {
+            top_corner();
+            zrot(90) top_corner();
+        }
+    }
+}
+
+bottom_corners();
+top_corners();
 
 
