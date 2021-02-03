@@ -39,6 +39,8 @@ totalWall = (wallThickness * 2) + slotThickness;
 outsideCornerRound = 1;
 edgeCornerRound = 1;
 
+$fn = 80;
+
 // interlock = true;
 
 
@@ -170,7 +172,7 @@ module interlock() {
     radius = wallThickness/3;
     translate([totalWall / 2, totalWall / 2, 0])
     zrot_copies([0, 90], r = totalWall/2)
-    cyl(sideLength - (totalWall*2), r=radius, fillet=radius, orient=ORIENT_X, center=false, $fn=20);
+    cyl(sideLength - (totalWall*2), r=radius, fillet=radius, orient=ORIENT_X, center=false);
 }
 
 // protrusion from bottom corner. I like the idea but I'm not sure how to print it...
@@ -188,27 +190,8 @@ module interlock() {
 
 //top_corner(true);
 
-hingeDepth = 5;
 
-module flat_corner_hinge() {
-    move(y=-hingeDepth) cube([sideLength, hingeDepth, totalWall]);
-//    move(y= -wallThickness)
-    flat_corner();
-}
-
-
-module top_corner_hinge() {
-    radius = hingeDepth/2;
-    top_corner(false);
-    move(z = radius, y = -radius) yrot(90) cyl(sideLength, r=radius, center=false, $fn=40);
-//    move(y = -radius *2) xrot(90) flat_corner();
-}
-
-
-//top_corner_hinge();
-//
-//move(z= -hingeDepth-1)
-//    flat_corner_hinge();
+/// distribution
 
 module bottom_corners(spacing = totalWall/2) {
     distance = (sideLength) + spacing;
@@ -220,12 +203,147 @@ module top_corners_tight() {
     rot_copies(n=4, delta = [totalWall,sideLength - totalWall,0]) zrot(180) xmove(-totalWall-wallThickness) top_corner();
 }
 
-bottom_corners();
+//bottom_corners(totalWall * 1.5);
+//top_corners_tight();
+
+hinge_depth = totalWall;
+
+// the width of the outside support of the hinge part. One is placed on each side of the hinge.
+hinge_wing = totalWall;
 
 
-bottom_corners(totalWall * 1.5);
-//top_corners();
-top_corners_tight();
+// the amount of space allowed for clearance on each side of the hinge connection.
+hinge_clearance = 0.3;
+hinge_inside_length = sideLength - (hinge_wing + hinge_clearance) * 2;
+
+// the size of the ball that is used for ball hinges
+hinge_ball = hinge_depth * .6;
+
+// the amount by which the indentation is increased to provide some clearance between
+// the ball and the indentation
+hinge_ball_clearance = hinge_clearance;
+
+// the percentage that the ball is protruded from the wing
+// 0: a full half of the ball is protruding
+// 1: the ball is not protruding at all
+// the indentation is likewise adjusted
+hinge_ball_pullback = .2;
+
+
+hinge_type = "ball"; // [none, ball, filament]
+
+
+// indent indicates that one side of the slot will be closed off
+// so that only one side of filament needs to be sealed
+module add_filament_hinge(diameter = 1.75) {
+    if (hinge_type == "filament") {
+        difference() {
+            children(0);
+            // this movement closes off one side of the outside hinge, so the filament only needs
+            // to be secured on one side, it does not affect the inside hinge.
+            zmove(wallThickness)
+            cylinder(sideLength, d = diameter);
+        }
+    } else {
+        children();
+    }
+}
+
+module add_ball_hinge(indent = true) {
+    if (hinge_type == "ball") {
+        if (indent) {
+            diameter = hinge_ball + hinge_clearance;
+            movement = -(diameter/2) * hinge_ball_pullback;
+            difference() {
+               children(0);
+               zmove(movement) sphere(d = diameter);
+            }
+        } else {
+            diameter = hinge_ball;
+            movement = (diameter/2) * hinge_ball_pullback;
+            union() {
+               children(0);
+               zmove(movement) sphere(d = diameter);
+            }
+        }
+    } else {
+        children();
+    }
+}
+
+module hinge_shape_top() {
+    // protrusion past bottom of the slot
+    ymove(hinge_depth) square([hinge_depth, hinge_depth], true);
+    // covers top half of the circle, to connect the circle to the square above it
+    ymove(hinge_depth/4) square([hinge_depth, hinge_depth/2], true);
+    circle(d = hinge_depth);
+}
+
+module hinge_shape_bottom() {
+    // top corner, where circle needs to be joined to the corner
+    square([hinge_depth/2, hinge_depth/2]);
+
+    // the circle that defines the center of rotation, and size of the hinge
+    circle(d = hinge_depth);
+
+    // now create a smooth transition from the outermost apex of the circle
+    // down to the body of the part
+    intersection() {
+        // this square covers the bottom half of the circle, where we want to add a bottom support to the circle
+        ymove(-hinge_depth/2) square([hinge_depth, hinge_depth], center=true);
+
+        // now a double-sized circle that is translated over, so that the outermost apex of both circles are aligned
+        move(x = hinge_depth/2) circle(r = hinge_depth);
+    }
+}
+
+module hinge_bottom() {
+    add_filament_hinge() {
+        union() {
+            cube([0,1,12]);
+            zmove(sideLength/2)
+            mirror_copy(offset = (sideLength/2) - hinge_wing)
+            add_ball_hinge(indent = true)
+            linear_extrude(hinge_wing) hinge_shape_bottom();
+        }
+    }
+}
+
+module hinge_top() {
+    add_filament_hinge() {
+        zmove(sideLength/2)
+        mirror_copy(offset = -sideLength/2)
+        zmove(hinge_wing + hinge_clearance)
+        add_ball_hinge(indent = false)
+        linear_extrude(hinge_inside_length) hinge_shape_top();
+    }
+}
+
+
+module flat_corner_hinge() {
+    move(y=-hingeDepth) cube([sideLength, hingeDepth, totalWall]);
+//    move(y= -wallThickness)
+    flat_corner();
+}
+
+
+module top_corner_hinge() {
+    top_corner();
+    //move(z = radius, y = -radius) yrot(90) cyl(sideLength, r=radius, center=false);
+//    move(y = -radius *2) xrot(90) flat_corner();
+}
+
+//    top_corner_hinge();
+
+
+
+
+
+
+xdistribute(hinge_depth * 2) {
+    hinge_top();
+    hinge_bottom();
+}
 
 //ydistribute(sideLength * 2 + 10) {
 //    bottom_corner(false);
