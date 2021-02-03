@@ -150,32 +150,21 @@ module back_plate(side = 10) {
 
     }
 
-    
+
 }
 
-module wall_mount() {
+module flat_corner() {
     overhang = 8;
     side = sideLength + 4;
-    
+
     difference() {
-        union() {
-            linear_extrude(totalWall) {
-                polygon(
-                    polyRound([
-                        [0,0, outsideCornerRound],
-                        [0, side, edgeCornerRound],
-                        [overhang, side, edgeCornerRound],
-                        [overhang, overhang, edgeCornerRound],
-                        [side, overhang, edgeCornerRound],
-                        [side, 0, edgeCornerRound]
-                    ])
-                );
-            }
-            back_plate(side);
+        linear_extrude(totalWall) {
+            corner_shape();
         }
-            
+
         // cut out slot for shelf sheet
-        translate([wallThickness*2, wallThickness*2, wallThickness]) cube([side, side, slotThickness]);        
+        cutDepth = wallThickness;
+        translate([cutDepth, cutDepth, wallThickness]) cube([side, side, slotThickness]);
     };
 }
 
@@ -203,14 +192,29 @@ module interlock() {
 
 //top_corner(true);
 
+hingeDepth = 5;
 
-ydistribute(sideLength * 2 + 10) {
-    bottom_corner(false);
+module flat_corner_hinge() {
+    move(y=-hingeDepth) cube([sideLength, hingeDepth, totalWall]);
+//    move(y= -wallThickness)
+    flat_corner();
+}
+
+
+module top_corner_hinge() {
+    radius = hingeDepth/2;
     top_corner(false);
-//    bottom_corner(true);
-//    top_corner(true);
-    3_way();
-    4_way();
+    move(z = radius, y = -radius) yrot(90) cyl(sideLength, r=radius, center=false, $fn=40);
+//    move(y = -radius *2) xrot(90) flat_corner();
+}
+
+
+//top_corner_hinge();
+//
+//move(z= -hingeDepth-1)
+//    flat_corner_hinge();
+
+
 bed_spacing = 4;
 
 module bottom_corners() {
@@ -244,5 +248,16 @@ module top_corners() {
 
 bottom_corners();
 top_corners();
+
+//ydistribute(sideLength * 2 + 10) {
+//    bottom_corner(false);
+//    top_corner(false);
+////    bottom_corner(true);
+////    top_corner(true);
+//    3_way();
+//    4_way();
+//
+//    flat_corner();
+//}
 
 
