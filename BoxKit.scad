@@ -128,30 +128,26 @@ module 4_way() {
     }
 }
 
-module back_plate(side = 10) {
-
-    plate_height = side * .6;
-
-    mirror_copy([0,0,1], 0, [0,0,totalWall/2])
-    difference() {
-        yrot(90) xflip() left(plate_height)
-        linear_extrude(side) polygon(
-            polyRound([
-                [0,0, 0],
-                [0, wallThickness, 2],
-                [plate_height, wallThickness, 4],
-                [plate_height, wallThickness * 4, 0],
-                [plate_height + totalWall, wallThickness * 4, 0],
-                [plate_height + totalWall, 0, 0],
-            ], fn = 20)
-        );
-
-    xrot(90, cp = [0,0,wallThickness/2])  right(side/2) forward(plate_height/1.7)  cylinder(wallThickness+.1, 4, 2, $fn = 30, center = true);
-
-    }
-
-
-}
+//module back_plate(side = 10) {
+//    plate_height = side * .6;
+//
+//    mirror_copy([0,0,1], 0, [0,0,totalWall/2])
+//    difference() {
+//        yrot(90) xflip() left(plate_height)
+//        linear_extrude(side) polygon(
+//            polyRound([
+//                [0,0, 0],
+//                [0, wallThickness, 2],
+//                [plate_height, wallThickness, 4],
+//                [plate_height, wallThickness * 4, 0],
+//                [plate_height + totalWall, wallThickness * 4, 0],
+//                [plate_height + totalWall, 0, 0],
+//            ])
+//        );
+//
+//        xrot(90, cp = [0,0,wallThickness/2])  right(side/2) forward(plate_height/1.7)  cylinder(wallThickness+.1, 4, 2);
+//    }
+//}
 
 module flat_corner() {
     overhang = 8;
