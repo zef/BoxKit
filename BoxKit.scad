@@ -8,11 +8,25 @@ include <BOSL/constants.scad>
 use <BOSL/transforms.scad>
 use <BOSL/shapes.scad>
 
+// the "stock" refers to the panel material that will make up the sides of the box
 stockThickness = 3;
-wallThickness = 1.2;
+perimeters = 3;
+extrusionWidth = 0.45;
+
+// how much space is added to the stock thickness
 clearance = 0.0;
+
+// the height determines how far the corner material will come up past the edge of the stock, or how tall the corner parts are
 height = 12;
-sideLength = 20;
+
+// sideLength determines how far the arms of the bracket extend from the corner of the stock
+sideLength = 26;
+
+
+// the wall thickness determines:
+// - the thickness of vertical walls that surround the stock
+// - the thickness of the
+wallThickness = perimeters * extrusionWidth;
 
 // this affects the bottom corner piece only
 // Instead of leaving a completely flat bottom, this creates a ledge,
@@ -26,6 +40,10 @@ outsideCornerRound = 1;
 edgeCornerRound = 1;
 
 // interlock = true;
+
+
+// could do some parameter validation, but may be fine to leave that to the user
+
 
 module slot() {
     translate([wallThickness, wallThickness, wallThickness])
@@ -89,8 +107,8 @@ module top_corner(interlock = false) {
             slot();
             zrot(270) left(totalWall) slot();
         };
-        
-        if (interlock) {   
+
+        if (interlock) {
             interlock();
         }
     }
@@ -111,11 +129,11 @@ module 4_way() {
 }
 
 module back_plate(side = 10) {
-    
+
     plate_height = side * .6;
-    
+
     mirror_copy([0,0,1], 0, [0,0,totalWall/2])
-    difference() {  
+    difference() {
         yrot(90) xflip() left(plate_height)
         linear_extrude(side) polygon(
             polyRound([
