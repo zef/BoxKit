@@ -214,40 +214,22 @@ module top_corner_hinge() {
 //move(z= -hingeDepth-1)
 //    flat_corner_hinge();
 
-
-bed_spacing = 4;
-
-module bottom_corners() {
-    distance = (sideLength * 2) + bed_spacing;
-    ydistribute(distance)  {
-        xdistribute(distance) {
-            bottom_corner();
-            zrot(90) bottom_corner();
-        }
-
-        zrot(180) xdistribute(distance) {
-            bottom_corner();
-            zrot(90) bottom_corner();
-        }
-    }
+module bottom_corners(spacing = totalWall/2) {
+    distance = (sideLength) + spacing;
+    rot_copies(n=4, delta = [distance,distance,0]) zrot(180) bottom_corner();
 }
-module top_corners() {
-    distance = sideLength * 2+ totalWall;// (sideLength * 2) + (totalWall * 2) + (bed_spacing * 2);
-    zrot(45) ydistribute(distance)  {
-        xdistribute(distance) {
-            top_corner();
-            zrot(90) top_corner();
-        }
 
-        zrot(180) xdistribute(distance) {
-            top_corner();
-            zrot(90) top_corner();
-        }
-    }
+module top_corners_tight() {
+    distance = sideLength;// (sideLength * 2) + (totalWall * 2) + (bed_spacing * 2);
+    rot_copies(n=4, delta = [totalWall,sideLength - totalWall,0]) zrot(180) xmove(-totalWall-wallThickness) top_corner();
 }
 
 bottom_corners();
-top_corners();
+
+
+bottom_corners(totalWall * 1.5);
+//top_corners();
+top_corners_tight();
 
 //ydistribute(sideLength * 2 + 10) {
 //    bottom_corner(false);
