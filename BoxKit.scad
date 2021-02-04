@@ -230,7 +230,7 @@ hinge_ball_clearance = hinge_clearance;
 hinge_ball_pullback = .2;
 
 
-hinge_type = "ball"; // [none, ball, filament]
+hinge_type = "filament"; // [none, ball, filament]
 
 
 // indent indicates that one side of the slot will be closed off
@@ -253,10 +253,10 @@ module add_ball_hinge(indent = true) {
     if (hinge_type == "ball") {
         if (indent) {
             diameter = hinge_ball + hinge_clearance;
-            movement = -(diameter/2) * hinge_ball_pullback;
+            copy_offset = hinge_inside_length / 2 + (diameter/2 * hinge_ball_pullback);
             difference() {
                children(0);
-               zmove(movement) sphere(d = diameter);
+               zmove(sideLength/2) zflip_copy(offset=copy_offset) sphere(d = diameter);
             }
         } else {
             diameter = hinge_ball;
@@ -272,10 +272,9 @@ module add_ball_hinge(indent = true) {
 }
 
 module hinge_shape_top() {
-    // protrusion past bottom of the slot
-    ymove(hinge_depth) square([hinge_depth, hinge_depth], true);
     // covers top half of the circle, to connect the circle to the square above it
-    ymove(hinge_depth/4) square([hinge_depth, hinge_depth/2], true);
+    // also moves half the distance through the section above it, allowing us to get rid of an unwanted rounded corner there
+    ymove(hinge_depth/2) square([hinge_depth, hinge_depth], true);
     circle(d = hinge_depth);
 }
 
@@ -300,10 +299,9 @@ module hinge_shape_bottom() {
 module hinge_bottom() {
     add_filament_hinge() {
         union() {
-            cube([0,1,12]);
             zmove(sideLength/2)
             mirror_copy(offset = (sideLength/2) - hinge_wing)
-            add_ball_hinge(indent = true)
+            add_ball_hinge(indent = false)
             linear_extrude(hinge_wing) hinge_shape_bottom();
         }
     }
@@ -311,38 +309,40 @@ module hinge_bottom() {
 
 module hinge_top() {
     add_filament_hinge() {
+        add_ball_hinge(indent = true)
         zmove(sideLength/2)
         mirror_copy(offset = -sideLength/2)
         zmove(hinge_wing + hinge_clearance)
-        add_ball_hinge(indent = false)
-        linear_extrude(hinge_inside_length) hinge_shape_top();
+        linear_extrude(hinge_inside_length)
+        hinge_shape_top();
     }
+
+    // add base that will be added to the flat corner
+    move(x=-hinge_depth/2, y=hinge_depth/2)
+    cuboid([totalWall + edgeCornerRound,totalWall,sideLength], fillet=edgeCornerRound, edges=EDGES_Z_LF, center= false);
 }
 
 
 module flat_corner_hinge() {
-    move(y=-hingeDepth) cube([sideLength, hingeDepth, totalWall]);
-//    move(y= -wallThickness)
     flat_corner();
+    zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_top();
 }
 
 
 module top_corner_hinge() {
     top_corner();
-    //move(z = radius, y = -radius) yrot(90) cyl(sideLength, r=radius, center=false);
-//    move(y = -radius *2) xrot(90) flat_corner();
+    xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_bottom();
+
+//    projection()
+
 }
 
-//    top_corner_hinge();
 
-
-
-
-
-
-xdistribute(hinge_depth * 2) {
-    hinge_top();
-    hinge_bottom();
+xdistribute(sideLength * 2) {
+    flat_corner_hinge();
+    top_corner_hinge();
+//    hinge_top();
+//    hinge_bottom();
 }
 
 //ydistribute(sideLength * 2 + 10) {
