@@ -8,19 +8,29 @@ include <BOSL/constants.scad>
 use <BOSL/transforms.scad>
 use <BOSL/shapes.scad>
 
+/* [Basic Dimensions:] */
 // the "stock" refers to the panel material that will make up the sides of the box
 stock_thickness = 3;
-perimeters = 3;
-extrusion_width = 0.45;
 
-// how much space is added to the stock thickness
-clearance = 0.0;
+// how much space is added to the stock thickness to create slots where your stock is inserted
+clearance = 0.1;
 
-// the height determines how far the corner material will come up past the edge of the stock, or how tall the corner parts are
+// how far the arms of the bracket extend from the corner of the stock
+side_length = 20;
+
+// how tall the corner parts are
 height = 12;
 
-// side_length determines how far the arms of the bracket extend from the corner of the stock
-side_length = 26;
+
+/* [3d Printer Configuration:] */
+
+// the number of perimeters your printer will use to create the sidewalls. This determines the thickness of the plastic surrounding the stock.
+perimeters = 3;
+
+// the width set in your slicer for 3d printing
+extrusion_width = 0.45;
+
+
 
 
 // the wall thickness determines:
@@ -36,12 +46,48 @@ insideHeight = 0;
 slot_thickness = stock_thickness + clearance;
 total_wall = (wall_thickness * 2) + slot_thickness;
 
+// how much rounding to apply to the corners
 outside_corner_round = 1;
 edge_corner_round = 1;
 
-$fn = 80;
+// how many faces are used when rendering curves. Use a small number like 10 for better performance when prototyping, and a large number like 60 for rendering for printing.
+$fn = 60;
 
 // interlock = true;
+
+/* [Hinges:] */
+
+// the type of hinging mechanism
+hinge_type = "ball"; // [none, ball, filament]
+
+// how far out the hinge protrudes from the edge of the parts
+hinge_depth = 6;
+
+// the width of the outside support of the hinge part. One is placed on each side of the hinge.
+hinge_wing = 4;
+
+
+// the amount of space allowed for clearance on each side of the hinge connection.
+hinge_clearance = 0.3;
+hinge_inside_length = side_length - (hinge_wing + hinge_clearance) * 2;
+
+// the size of the ball that is used for ball hinges
+hinge_ball = hinge_depth * .6;
+
+// the amount by which the indentation is increased to provide some clearance between
+// the ball and the indentation
+hinge_ball_clearance = hinge_clearance;
+
+// the percentage that the ball is protruding, or used to create the indentation. 0 represents a full half of the ball is protruding. 1 represents the ball not protruding at all
+hinge_ball_pullback = .2;
+
+hinge_filament_hole = 1.75 + .2;
+
+
+
+echo("<b>Wall: ", wall_thickness);
+echo("<b>Total Wall: ", total_wall);
+
 
 
 // could do some parameter validation, but may be fine to leave that to the user
@@ -208,43 +254,18 @@ module top_corners_tight() {
 //bottom_corners(total_wall * 1.5);
 //top_corners_tight();
 
-hinge_depth = total_wall;
-
-// the width of the outside support of the hinge part. One is placed on each side of the hinge.
-hinge_wing = total_wall;
-
-
-// the amount of space allowed for clearance on each side of the hinge connection.
-hinge_clearance = 0.3;
-hinge_inside_length = side_length - (hinge_wing + hinge_clearance) * 2;
-
-// the size of the ball that is used for ball hinges
-hinge_ball = hinge_depth * .6;
-
-// the amount by which the indentation is increased to provide some clearance between
-// the ball and the indentation
-hinge_ball_clearance = hinge_clearance;
-
-// the percentage that the ball is protruded from the wing
-// 0: a full half of the ball is protruding
-// 1: the ball is not protruding at all
-// the indentation is likewise adjusted
-hinge_ball_pullback = .2;
-
-
-hinge_type = "ball"; // [none, ball, filament]
 
 
 // indent indicates that one side of the slot will be closed off
 // so that only one side of filament needs to be sealed
-module add_filament_hinge(diameter=1.75) {
+module add_filament_hinge() {
     if (hinge_type == "filament") {
         difference() {
             children(0);
             // this movement closes off one side of the outside hinge, so the filament only needs
             // to be secured on one side, it does not affect the inside hinge.
             zmove(wall_thickness)
-            cylinder(side_length, d=diameter);
+            cylinder(side_length, d=hinge_filament_hole);
         }
     } else {
         children();
@@ -254,7 +275,7 @@ module add_filament_hinge(diameter=1.75) {
 module add_ball_hinge(indent=true) {
     if (hinge_type == "ball") {
         if (indent) {
-            diameter = hinge_ball + hinge_clearance;
+            diameter = hinge_ball + hinge_ball_clearance;
             copy_offset = hinge_inside_length / 2 + (diameter/2 * hinge_ball_pullback);
             difference() {
                children(0);
