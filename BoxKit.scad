@@ -64,22 +64,32 @@ hinge_type = "ball"; // [none, ball, filament]
 hinge_depth = 6;
 
 // the width of the outside support of the hinge part. One is placed on each side of the hinge.
-hinge_wing = 4;
+hinge_wing = 3.5;
 
 
 // the amount of space allowed for clearance on each side of the hinge connection.
 hinge_clearance = 0.3;
+
+// space added to the hinge extending from the bottom of the lid, provides space for the lid to close fully
+hinge_lid_clearance = 0.2;
+
+
+// Adds extra clearance for the the parts that contain the lid. I've found that this part prints a bit too tight compared to the other slots, due to the three-sided vertical support, rather than two-sided, like the others.
+hinge_lid_slot_extra_clearance = 0.1;
+
 hinge_inside_length = side_length - (hinge_wing + hinge_clearance) * 2;
 
-// the size of the ball that is used for ball hinges
-hinge_ball = hinge_depth * .6;
+// multiplied by hinge_depth to determine the diameter of the ball used for ball hinges. You may need to increase the Hinge Ball Pullback as this ratio is increased
+hinge_ball_ratio = 0.7;
 
-// the amount by which the indentation is increased to provide some clearance between
-// the ball and the indentation
-hinge_ball_clearance = hinge_clearance;
+// the size of the ball that is used for ball hinges
+hinge_ball = hinge_depth * hinge_ball_ratio;
+
+// the amount by which the indentation is increased to provide some clearance between the ball and the indentation
+hinge_ball_clearance = .2;
 
 // the percentage that the ball is protruding, or used to create the indentation. 0 represents a full half of the ball is protruding. 1 represents the ball not protruding at all
-hinge_ball_pullback = .2;
+hinge_ball_pullback = .4;
 
 hinge_filament_hole = 1.75 + .2;
 
@@ -202,13 +212,13 @@ module lid_corner() {
     side = side_length + 4;
 
     difference() {
-        linear_extrude(total_wall) {
+        linear_extrude(total_wall + hinge_lid_slot_extra_clearance) {
             corner_shape();
         }
 
         // cut out slot for shelf sheet
         cut_depth = wall_thickness;
-        translate([cut_depth, cut_depth, wall_thickness]) cube([side, side, slot_thickness]);
+        translate([cut_depth, cut_depth, wall_thickness]) cube([side, side, slot_thickness + hinge_lid_slot_extra_clearance]);
     };
 }
 
@@ -276,7 +286,7 @@ module add_ball_hinge(indent=true) {
     if (hinge_type == "ball") {
         if (indent) {
             diameter = hinge_ball + hinge_ball_clearance;
-            copy_offset = hinge_inside_length / 2 + (diameter/2 * hinge_ball_pullback);
+            copy_offset = (hinge_inside_length + (diameter/2 * hinge_ball_pullback)) / 2;
             difference() {
                children(0);
                zmove(side_length/2) zflip_copy(offset=copy_offset) sphere(d=diameter);
@@ -331,6 +341,7 @@ module hinge_bottom() {
 }
 
 module hinge_top() {
+    ymove(-hinge_lid_clearance)
     add_filament_hinge() {
         add_ball_hinge(indent=true)
         zmove(side_length/2)
