@@ -321,7 +321,7 @@ module hinge_top() {
 
     // add base that will be added to the flat corner
     move(x=-hinge_depth/2, y=hinge_depth/2)
-    cuboid([total_wall + edge_corner_round,total_wall,side_length], fillet=edge_corner_round, edges=EDGES_Z_LF, center= false);
+    cuboid([hinge_depth + edge_corner_round,total_wall,side_length], fillet=edge_corner_round, edges=EDGES_Z_LF, center= false);
 }
 
 
