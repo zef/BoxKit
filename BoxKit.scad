@@ -349,11 +349,9 @@ module top_corner_hinge() {
 }
 
 module corner_hinge_set() {
-    // would be prettier to lay them out in the orientation that they would be when assembled
-    // but this layout keeps the tall parts closer, so the printer doesn't have to move as far
-    yflip_copy() ymove(bed_spacing)
+    yflip_copy() ymove(-bed_spacing - side_length)
     xdistribute(total_wall * 2 + bed_spacing) {
-        lid_corner_hinge();
+        ymove(side_length) yflip() lid_corner_hinge();
         top_corner_hinge();
     }
 }
