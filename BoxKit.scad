@@ -19,8 +19,8 @@ clearance = 0.0;
 // the height determines how far the corner material will come up past the edge of the stock, or how tall the corner parts are
 height = 12;
 
-// sideLength determines how far the arms of the bracket extend from the corner of the stock
-sideLength = 26;
+// side_length determines how far the arms of the bracket extend from the corner of the stock
+side_length = 26;
 
 
 // the wall thickness determines:
@@ -49,17 +49,17 @@ $fn = 80;
 
 module slot() {
     translate([wall_thickness, wall_thickness, wall_thickness])
-    cube([slot_thickness, sideLength, height]);
+    cube([slot_thickness, side_length, height]);
 }
 
 module bottom_corner_triangle_shape() {
     polygon(
         polyRound([
             [0,0, outside_corner_round],
-            [0, sideLength, edge_corner_round],
-            [total_wall, sideLength, edge_corner_round],
-            [sideLength, total_wall, edge_corner_round],
-            [sideLength, 0, edge_corner_round]
+            [0, side_length, edge_corner_round],
+            [total_wall, side_length, edge_corner_round],
+            [side_length, total_wall, edge_corner_round],
+            [side_length, 0, edge_corner_round]
         ])
     );
 }
@@ -68,11 +68,11 @@ module corner_shape() {
     polygon(
         polyRound([
             [0,0, outside_corner_round],
-            [0, sideLength, edge_corner_round],
-            [total_wall, sideLength, edge_corner_round],
+            [0, side_length, edge_corner_round],
+            [total_wall, side_length, edge_corner_round],
             [total_wall, total_wall, edge_corner_round],
-            [sideLength, total_wall, edge_corner_round],
-            [sideLength, 0, edge_corner_round]
+            [side_length, total_wall, edge_corner_round],
+            [side_length, 0, edge_corner_round]
         ])
     );
 }
@@ -90,7 +90,7 @@ module bottom_corner(interlock=false) {
         zrot(270) left(total_wall) slot();
 
         // flatten out inside ledge, providing suppport for the bottom part
-        translate([slot_thickness, slot_thickness, wall_thickness + insideHeight]) cube([sideLength, sideLength, height]);
+        translate([slot_thickness, slot_thickness, wall_thickness + insideHeight]) cube([side_length, side_length, height]);
 
         if (interlock) {
             interlock();
@@ -119,14 +119,14 @@ module top_corner(interlock=false) {
 module 3_way() {
     difference() {
         mirror_copy([0,1,0], 0, [0,(wall_thickness + slot_thickness/2),0]) top_corner();
-        forward(sideLength / 2) slot();
+        forward(side_length / 2) slot();
     }
 }
 
 module 4_way() {
     difference() {
         mirror_copy([1,0,0], 0, [(wall_thickness + slot_thickness/2),0,0]) 3_way();
-        zrot(90) forward((wall_thickness*3) + sideLength/2) slot();
+        zrot(90) forward((wall_thickness*3) + side_length/2) slot();
     }
 }
 
@@ -153,7 +153,7 @@ module 4_way() {
 
 module lid_corner() {
     overhang = 8;
-    side = sideLength + 4;
+    side = side_length + 4;
 
     difference() {
         linear_extrude(total_wall) {
@@ -172,7 +172,7 @@ module interlock() {
     radius = wall_thickness/3;
     translate([total_wall / 2, total_wall / 2, 0])
     zrot_copies([0, 90], r = total_wall/2)
-    cyl(sideLength - (total_wall*2), r=radius, fillet=radius, orient=ORIENT_X, center=false);
+    cyl(side_length - (total_wall*2), r=radius, fillet=radius, orient=ORIENT_X, center=false);
 }
 
 // protrusion from bottom corner. I like the idea but I'm not sure how to print it...
@@ -196,13 +196,13 @@ module interlock() {
 bed_spacing = 2;
 
 module bottom_corners(spacing=total_wall/2) {
-    distance = (sideLength) + spacing;
+    distance = (side_length) + spacing;
     rot_copies(n=4, delta = [distance,distance,0]) zrot(180) bottom_corner();
 }
 
 module top_corners_tight() {
-    distance = sideLength;// (sideLength * 2) + (total_wall * 2) + (bed_spacing * 2);
-    rot_copies(n=4, delta = [total_wall,sideLength - total_wall,0]) zrot(180) xmove(-total_wall-wall_thickness) top_corner();
+    distance = side_length;// (side_length * 2) + (total_wall * 2) + (bed_spacing * 2);
+    rot_copies(n=4, delta = [total_wall,side_length - total_wall,0]) zrot(180) xmove(-total_wall-wall_thickness) top_corner();
 }
 
 //bottom_corners(total_wall * 1.5);
@@ -216,7 +216,7 @@ hinge_wing = total_wall;
 
 // the amount of space allowed for clearance on each side of the hinge connection.
 hinge_clearance = 0.3;
-hinge_inside_length = sideLength - (hinge_wing + hinge_clearance) * 2;
+hinge_inside_length = side_length - (hinge_wing + hinge_clearance) * 2;
 
 // the size of the ball that is used for ball hinges
 hinge_ball = hinge_depth * .6;
@@ -244,7 +244,7 @@ module add_filament_hinge(diameter=1.75) {
             // this movement closes off one side of the outside hinge, so the filament only needs
             // to be secured on one side, it does not affect the inside hinge.
             zmove(wall_thickness)
-            cylinder(sideLength, d=diameter);
+            cylinder(side_length, d=diameter);
         }
     } else {
         children();
@@ -258,7 +258,7 @@ module add_ball_hinge(indent=true) {
             copy_offset = hinge_inside_length / 2 + (diameter/2 * hinge_ball_pullback);
             difference() {
                children(0);
-               zmove(sideLength/2) zflip_copy(offset=copy_offset) sphere(d=diameter);
+               zmove(side_length/2) zflip_copy(offset=copy_offset) sphere(d=diameter);
             }
         } else {
             diameter = hinge_ball;
@@ -301,8 +301,8 @@ module hinge_shape_bottom() {
 module hinge_bottom() {
     add_filament_hinge() {
         union() {
-            zmove(sideLength/2)
-            mirror_copy(offset=(sideLength/2) - hinge_wing)
+            zmove(side_length/2)
+            mirror_copy(offset=(side_length/2) - hinge_wing)
             add_ball_hinge(indent=false)
             linear_extrude(hinge_wing) hinge_shape_bottom();
         }
@@ -312,8 +312,8 @@ module hinge_bottom() {
 module hinge_top() {
     add_filament_hinge() {
         add_ball_hinge(indent=true)
-        zmove(sideLength/2)
-        mirror_copy(offset=-sideLength/2)
+        zmove(side_length/2)
+        mirror_copy(offset=-side_length/2)
         zmove(hinge_wing + hinge_clearance)
         linear_extrude(hinge_inside_length)
         hinge_shape_top();
@@ -321,14 +321,14 @@ module hinge_top() {
 
     // add base that will be added to the flat corner
     move(x=-hinge_depth/2, y=hinge_depth/2)
-    cuboid([total_wall + edge_corner_round,total_wall,sideLength], fillet=edge_corner_round, edges=EDGES_Z_LF, center= false);
+    cuboid([total_wall + edge_corner_round,total_wall,side_length], fillet=edge_corner_round, edges=EDGES_Z_LF, center= false);
 }
 
 
 module lid_corner_hinge() {
     // just visual positioning
     zmove(hinge_depth) yrot(270)
-    
+
     union() {
         lid_corner();
         zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_top();
@@ -360,7 +360,7 @@ module corner_hinge_set() {
 
 corner_hinge_set();
 
-//ydistribute(sideLength * 2 + 10) {
+//ydistribute(side_length * 2 + 10) {
 //    bottom_corner(false);
 //    top_corner(false);
 ////    bottom_corner(true);
