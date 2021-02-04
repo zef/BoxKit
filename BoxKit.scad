@@ -344,7 +344,7 @@ module top_corner_hinge() {
     // now we take a projection of the side that goes against the corner piece
     // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
     move(z=hinge_depth) rotate([90,0,90])
-    linear_extrude(edge_corner_round)
+    linear_extrude(min(wall_thickness, edge_corner_round))
     projection() yrot(90) hinge_bottom();
 }
 
