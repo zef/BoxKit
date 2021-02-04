@@ -151,7 +151,7 @@ module 4_way() {
 //    }
 //}
 
-module flat_corner() {
+module lid_corner() {
     overhang = 8;
     side = sideLength + 4;
 
@@ -193,6 +193,8 @@ module interlock() {
 
 /// distribution
 
+bed_spacing = 2;
+
 module bottom_corners(spacing=total_wall/2) {
     distance = (sideLength) + spacing;
     rot_copies(n=4, delta = [distance,distance,0]) zrot(180) bottom_corner();
@@ -230,7 +232,7 @@ hinge_ball_clearance = hinge_clearance;
 hinge_ball_pullback = .2;
 
 
-hinge_type = "filament"; // [none, ball, filament]
+hinge_type = "ball"; // [none, ball, filament]
 
 
 // indent indicates that one side of the slot will be closed off
@@ -323,27 +325,40 @@ module hinge_top() {
 }
 
 
-module flat_corner_hinge() {
-    flat_corner();
-    zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_top();
+module lid_corner_hinge() {
+    // just visual positioning
+    zmove(hinge_depth) yrot(270)
+    
+    union() {
+        lid_corner();
+        zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_top();
+    }
 }
 
 
 module top_corner_hinge() {
+    union()
     top_corner();
     xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_bottom();
 
-//    projection()
-
+    // now we take a projection of the side that goes against the corner piece
+    // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
+    move(z=hinge_depth) rotate([90,0,90])
+    linear_extrude(edge_corner_round)
+    projection() yrot(90) hinge_bottom();
 }
 
-
-xdistribute(sideLength * 2) {
-    flat_corner_hinge();
-    top_corner_hinge();
-//    hinge_top();
-//    hinge_bottom();
+module corner_hinge_set() {
+    // would be prettier to lay them out in the orientation that they would be when assembled
+    // but this layout keeps the tall parts closer, so the printer doesn't have to move as far
+    yflip_copy() ymove(bed_spacing)
+    xdistribute(total_wall * 2 + bed_spacing) {
+        lid_corner_hinge();
+        top_corner_hinge();
+    }
 }
+
+corner_hinge_set();
 
 //ydistribute(sideLength * 2 + 10) {
 //    bottom_corner(false);
@@ -353,7 +368,7 @@ xdistribute(sideLength * 2) {
 //    3_way();
 //    4_way();
 //
-//    flat_corner();
+//    lid_corner();
 //}
 
 
