@@ -208,9 +208,6 @@ module 4_way() {
 //}
 
 module lid_corner() {
-    overhang = 8;
-    side = side_length + 4;
-
     difference() {
         linear_extrude(total_wall + hinge_lid_slot_extra_clearance) {
             corner_shape();
