@@ -134,7 +134,6 @@ module corner_shape() {
 }
 
 
-
 module bottom_corner(interlock=false) {
     difference() {
         linear_extrude(height) {
@@ -215,7 +214,7 @@ module lid_corner() {
 
         // cut out slot for shelf sheet
         cut_depth = wall_thickness;
-        translate([cut_depth, cut_depth, wall_thickness]) cube([side, side, slot_thickness + hinge_lid_slot_extra_clearance]);
+        translate([cut_depth, cut_depth, wall_thickness]) cube([side_length, side_length, slot_thickness + hinge_lid_slot_extra_clearance]);
     };
 }
 
@@ -366,26 +365,74 @@ module lid_corner_hinge() {
 
 
 module top_corner_hinge() {
-    union()
-    top_corner();
-    xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_bottom();
+    union() {
+        top_corner();
+        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_bottom();
 
-    // now we take a projection of the side that goes against the corner piece
-    // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
-    move(z=hinge_depth) rotate([90,0,90])
-    linear_extrude(min(wall_thickness, edge_corner_round))
-    projection() yrot(90) hinge_bottom();
+        // now we take a projection of the side that goes against the corner piece
+        // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
+        move(z=hinge_depth) rotate([90,0,90])
+        linear_extrude(min(wall_thickness, edge_corner_round))
+        projection() yrot(90) hinge_bottom();
+    }
 }
 
 module corner_hinge_set() {
-    yflip_copy() ymove(-bed_spacing - side_length)
+//    yflip_copy() ymove(-bed_spacing - side_length)
     xdistribute(total_wall * 2 + bed_spacing) {
         ymove(side_length) yflip() lid_corner_hinge();
         top_corner_hinge();
     }
 }
 
-corner_hinge_set();
+module flat_attachment() {
+    difference() {
+        cuboid([total_wall,side_length,height], fillet=edge_corner_round, edges=EDGES_Z_ALL, center= false);
+
+        translate([wall_thickness, -.5, wall_thickness])
+        cube([slot_thickness, side_length + 1, side_length + 1]);
+    }
+}
+
+module flat_hinge_lid() {
+    zmove(hinge_depth) yrot(270)
+
+    union() {
+        zmove(total_wall) rotate([0, 90]) flat_attachment();
+        zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_top();
+    }
+}
+
+
+module flat_hinge_box() {
+    union() {        
+       flat_attachment();
+//        move(z=total_wall) 
+    
+        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_bottom();
+
+        // now we take a projection of the side that goes against the corner piece
+        // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
+//        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) 
+//        linear_extrude(min(wall_thickness, edge_corner_round))
+//        projection() zrot(90) hinge_bottom();
+
+    }
+}
+
+module flat_hinge_set() {
+    xdistribute(side_length + bed_spacing) {
+        ymove(side_length) yflip() flat_hinge_lid();
+        flat_hinge_box();
+    }
+}
+
+
+flat_hinge_set();
+
+
+
+left(side_length + 40) corner_hinge_set();
 
 //ydistribute(side_length * 2 + 10) {
 //    bottom_corner(false);
