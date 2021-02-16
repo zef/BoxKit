@@ -47,7 +47,6 @@ slot_thickness = stock_thickness + clearance;
 total_wall = (wall_thickness * 2) + slot_thickness;
 
 // how much rounding to apply to the corners
-outside_corner_round = 1;
 edge_corner_round = 1;
 
 // how many faces are used when rendering curves. Use a small number like 10 for better performance when prototyping, and a large number like 60 for rendering for printing.
@@ -111,7 +110,7 @@ module slot() {
 module bottom_corner_triangle_shape() {
     polygon(
         polyRound([
-            [0,0, outside_corner_round],
+            [0,0, edge_corner_round],
             [0, side_length, edge_corner_round],
             [total_wall, side_length, edge_corner_round],
             [side_length, total_wall, edge_corner_round],
@@ -123,7 +122,7 @@ module bottom_corner_triangle_shape() {
 module corner_shape() {
     polygon(
         polyRound([
-            [0,0, outside_corner_round],
+            [0,0, edge_corner_round],
             [0, side_length, edge_corner_round],
             [total_wall, side_length, edge_corner_round],
             [total_wall, total_wall, edge_corner_round],
