@@ -325,18 +325,31 @@ module hinge_shape_bottom() {
     }
 }
 
-module hinge_bottom() {
+module hinge_knuckle_outside(extended=true) {
     add_filament_hinge() {
         union() {
             zmove(side_length/2)
             mirror_copy(offset=(side_length/2) - hinge_wing)
             add_ball_hinge(indent=false)
             linear_extrude(hinge_wing) hinge_shape_bottom();
+
+
+            if (extended) {
+                // now we take a projection of the side that goes against the body of the piece
+                // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
+                distance = min(wall_thickness, edge_corner_round);
+
+                // where does this .5 come from? It's not half the distance, not sure why I need it...
+                move(z=side_length, x=hinge_wing - distance+.5)
+                rotate([90,90,90])
+                linear_extrude(distance)
+                projection() yrot(90) hinge_knuckle_outside(extended=false);
+            }
         }
     }
 }
 
-module hinge_top() {
+module hinge_knuckle_inside(flat_hinge=false) {
     ymove(-hinge_lid_clearance)
     add_filament_hinge() {
         add_ball_hinge(indent=true)
@@ -347,9 +360,13 @@ module hinge_top() {
         hinge_shape_top();
     }
 
+    // not entirely sure on the nicest rounding options, but I'll go with this for now.
+    round_edges = flat_hinge ? [[1,1,1,1], [0,0,0,0], [0,1,1,0]] : EDGES_Z_LF;
+    cube_thickness = flat_hinge ? total_wall : total_wall + hinge_lid_slot_extra_clearance;
+
     // add base that will be added to the flat corner
     move(x=-hinge_depth/2, y=hinge_depth/2)
-    cuboid([hinge_depth + edge_corner_round,total_wall,side_length], fillet=edge_corner_round, edges=EDGES_Z_LF, center= false);
+    cuboid([hinge_depth + edge_corner_round,cube_thickness,side_length], fillet=edge_corner_round, edges=round_edges, center=false);
 }
 
 
@@ -359,21 +376,21 @@ module lid_corner_hinge() {
 
     union() {
         lid_corner();
-        zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_top();
+        zflip() xrot(270) move(x=-hinge_depth/2, y=-(hinge_depth)/2) hinge_knuckle_inside();
     }
 }
 
 
+// this is the top corner piece of the box, with a hinge attached to it
+// this piece coins with a `lid_corner_hinge` piece
 module top_corner_hinge() {
     union() {
         top_corner();
-        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_bottom();
+        xrot(270) move(x=-hinge_depth/2, y=-(hinge_depth)/2) hinge_knuckle_outside();
 
         // now we take a projection of the side that goes against the corner piece
         // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
-        move(z=hinge_depth) rotate([90,0,90])
-        linear_extrude(min(wall_thickness, edge_corner_round))
-        projection() yrot(90) hinge_bottom();
+
     }
 }
 
@@ -387,7 +404,7 @@ module corner_hinge_set() {
 
 module flat_attachment() {
     difference() {
-        cuboid([total_wall,side_length,height], fillet=edge_corner_round, edges=EDGES_Z_ALL, center= false);
+        cuboid([total_wall,side_length,height], fillet=edge_corner_round, edges=EDGES_Z_ALL, center=false);
 
         translate([wall_thickness, -.5, wall_thickness])
         cube([slot_thickness, side_length + 1, side_length + 1]);
@@ -399,38 +416,27 @@ module flat_hinge_lid() {
 
     union() {
         zmove(total_wall) rotate([0, 90]) flat_attachment();
-        zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_top();
+        zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_inside(flat_hinge=true);
     }
 }
 
 
-module flat_hinge_box() {
-    union() {        
-       flat_attachment();
-//        move(z=total_wall) 
-    
-        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_bottom();
-
-        // now we take a projection of the side that goes against the corner piece
-        // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
-//        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) 
-//        linear_extrude(min(wall_thickness, edge_corner_round))
-//        projection() zrot(90) hinge_bottom();
-
+module flat_hinge_knuckle_outside() {
+    union() {
+        flat_attachment();
+        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_outside();
     }
 }
 
 module flat_hinge_set() {
-    xdistribute(side_length + bed_spacing) {
+    xdistribute(side_length + 10 + bed_spacing) {
         ymove(side_length) yflip() flat_hinge_lid();
-        flat_hinge_box();
+        flat_hinge_knuckle_outside();
     }
 }
 
 
 flat_hinge_set();
-
-
 
 left(side_length + 40) corner_hinge_set();
 
