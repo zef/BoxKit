@@ -1,3 +1,5 @@
+// https://github.com/zef/BoxKit
+
 
 // https://github.com/Irev-Dev/Round-Anything
 include <Round-Anything/polyround.scad>
@@ -7,6 +9,15 @@ include <Round-Anything/MinkowskiRound.scad>
 include <BOSL/constants.scad>
 use <BOSL/transforms.scad>
 use <BOSL/shapes.scad>
+
+
+/* [Part Selections:] */
+
+// bottom
+
+// What do you want to print?
+print_parts = "box"; //[box, hinged box, top corners 2x, top corners 4x, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap]
+
 
 /* [Basic Dimensions:] */
 // The "stock" refers to the panel material that will make up the sides of the box
@@ -47,11 +58,8 @@ insideHeight = 0;
 slot_thickness = stock_thickness + clearance;
 total_wall = (wall_thickness * 2) + slot_thickness;
 
-// how much rounding to apply to the corners
+// How much rounding to apply to the corners
 edge_corner_round = 1;
-
-// how many faces are used when rendering curves. Use a small number like 10 for better performance when prototyping, and a large number like 60 for rendering for printing.
-$fn = 60;
 
 // interlock = true;
 
@@ -93,6 +101,14 @@ hinge_ball_pullback = .4;
 
 hinge_filament_hole = 1.75 + .2;
 
+
+/* [Edge Caps:] */
+
+// How long do you want the edge cap to be? This should be the "empty" space left between the corners on your box.
+edge_cap_length = 40;
+
+// Make the edge cap taller, so it will fill the gap left by the lid above the box. You can print a separate edge cap for the lid, or set this to true to print only one edge cap that fills both gaps.
+edge_cap_tall = false;
 
 
 echo("<b>Wall: ", wall_thickness);
@@ -244,29 +260,10 @@ module interlock() {
 //}
 
 
-//bottom_corner(true);
 
-//top_corner(true);
-
-
-/// distribution
-
-bed_spacing = 2;
-
-module bottom_corners(spacing=total_wall/2) {
-    distance = (side_length) + spacing;
-    rot_copies(n=4, delta = [distance,distance,0]) zrot(180) bottom_corner();
-}
-
-module top_corners_tight() {
-    distance = side_length;// (side_length * 2) + (total_wall * 2) + (bed_spacing * 2);
-    rot_copies(n=4, delta = [total_wall,side_length - total_wall,0]) zrot(180) xmove(-total_wall-wall_thickness) top_corner();
-}
-
-//bottom_corners(total_wall * 1.5);
-//top_corners_tight();
-
-
+/////////////////////////////
+// Hinges
+/////////////////////////////
 
 // indent indicates that one side of the slot will be closed off
 // so that only one side of filament needs to be sealed
@@ -400,28 +397,26 @@ module top_corner_hinge() {
     }
 }
 
-module corner_hinge_set() {
-//    yflip_copy() ymove(-bed_spacing - side_length)
-    xdistribute(total_wall * 2 + bed_spacing) {
-        ymove(side_length) yflip() lid_corner_hinge();
-        top_corner_hinge();
-    }
-}
-
-module flat_attachment() {
+// tall is passed as a variable here because the function is used internally, as well as to create
+// the edge cap part that looks at the edge_cap_tall variable, and passes it into here
+module edge_cap(length=side_length, height=height, tall=false) {
     difference() {
-        cuboid([total_wall,side_length,height], fillet=edge_corner_round, edges=EDGES_Z_ALL, center=false);
+        cap_height = tall ? height + wall_thickness : height;
+        cuboid([total_wall,length,cap_height], fillet=edge_corner_round, edges=EDGES_Z_ALL, center=false);
 
-        translate([wall_thickness, -.5, wall_thickness])
-        cube([slot_thickness, side_length + 1, side_length + 1]);
+        // the - .5 and the + 1 are to get rid of the visual artifact from the OpenSCAD difference implementation when the items share an outside plane
+        z_offset = tall ? wall_thickness * 2 : wall_thickness;
+        translate([wall_thickness, -.5, z_offset])
+        cube([slot_thickness, length + 1, height]);
     }
 }
 
 module flat_hinge_lid() {
+    // rotate into printable orientation
     zmove(hinge_depth) yrot(270)
 
     union() {
-        zmove(total_wall) rotate([0, 90]) flat_attachment();
+        zmove(total_wall) rotate([0, 90]) edge_cap(length=side_length, height=total_wall);
         zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_inside(flat_hinge=true);
     }
 }
@@ -429,32 +424,101 @@ module flat_hinge_lid() {
 
 module flat_hinge_knuckle_outside() {
     union() {
-        flat_attachment();
+        edge_cap(length=side_length, height=height);
         xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_outside();
     }
 }
 
+
+/////////////////////////////
+// Printable Sets
+/////////////////////////////
+
+bed_spacing = 2;
+
+module corner_hinge_set() {
+    xmove(-side_length/4)
+    yflip_copy() ymove(-bed_spacing - side_length)
+    xdistribute(hinge_depth * 2 + bed_spacing) {
+        ymove(side_length) yflip() lid_corner_hinge();
+        top_corner_hinge();
+    }
+}
+
 module flat_hinge_set() {
-    xdistribute(side_length + 10 + bed_spacing) {
+    xdistribute(hinge_depth * 2 + bed_spacing) {
         ymove(side_length) yflip() flat_hinge_lid();
         flat_hinge_knuckle_outside();
     }
 }
 
 
-flat_hinge_set();
+module bottom_corners(spacing=bed_spacing) {
+    distance = (side_length) + spacing;
+    rot_copies(n=4, delta = [distance,distance,0]) zrot(180) bottom_corner();
+}
 
-left(side_length + 40) corner_hinge_set();
+module top_corners(count=4) {
+    rot_copies(n=count, delta = [total_wall,(side_length + total_wall + total_wall)/2 + bed_spacing,0])
+    zrot(180) xmove(-(side_length-total_wall-total_wall)/2) top_corner();
+}
 
-//ydistribute(side_length * 2 + 10) {
-//    bottom_corner(false);
-//    top_corner(false);
-////    bottom_corner(true);
-////    top_corner(true);
-//    3_way();
-//    4_way();
-//
-//    lid_corner();
+
+quadrant_spacing = side_length * 2 + bed_spacing * 6;
+
+if (print_parts == "box") {
+    ydistribute(quadrant_spacing) {
+        bottom_corners();
+        top_corners();
+    }
+}
+
+if (print_parts == "hinged box") {
+    ydistribute(quadrant_spacing) {
+        bottom_corners();
+        corner_hinge_set();
+        top_corners(2);
+    }
+}
+
+if (print_parts == "top corners 2x") {
+    top_corners(2);
+}
+
+if (print_parts == "top corners 4x") {
+    top_corners();
+}
+
+if (print_parts == "bottom corners") {
+    bottom_corners();
+}
+
+if (print_parts == "3-way divider") {
+    3_way();
+}
+
+if (print_parts == "4-way divider") {
+    4_way();
+}
+
+if (print_parts == "hinges only — corners") {
+    corner_hinge_set();
+}
+
+if (print_parts == "hinges only — flat") {
+    ymove(-side_length/2) flat_hinge_set();
+}
+
+if (print_parts == "edge cap") {
+    ymove(-edge_cap_length/2) edge_cap(height=total_wall, length=edge_cap_length, tall=edge_cap_tall);
+}
+
+
+//xdistribute(quadrant_spacing) {
+//    ydistribute(quadrant_spacing) {
+//    }
+//    ydistribute(quadrant_spacing) {
+//    }
 //}
 
 
