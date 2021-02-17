@@ -9,31 +9,32 @@ use <BOSL/transforms.scad>
 use <BOSL/shapes.scad>
 
 /* [Basic Dimensions:] */
-// the "stock" refers to the panel material that will make up the sides of the box
+// The "stock" refers to the panel material that will make up the sides of the box
 stock_thickness = 3;
 
-// how much space is added to the stock thickness to create slots where your stock is inserted
+// How much space is added to the stock thickness to create slots where your stock is inserted
 clearance = 0.1;
 
-// how far the arms of the bracket extend from the corner of the stock
+// How far the arms of the bracket extend from the corner of the stock
 side_length = 20;
 
-// how tall the corner parts are
+// How tall the corner parts are
 height = 12;
+
 
 
 /* [3d Printer Configuration:] */
 
-// the number of perimeters your printer will use to create the sidewalls. This determines the thickness of the plastic surrounding the stock.
+// The number of perimeters your printer will use to create the sidewalls. This determines the thickness of the plastic surrounding the stock.
 perimeters = 3;
 
-// the width set in your slicer for 3d printing
+// The width set in your slicer for 3d printing
 extrusion_width = 0.45;
 
 
 
 
-// the wall thickness determines:
+// The wall thickness determines:
 // - the thickness of vertical walls that surround the stock
 // - the thickness of the
 wall_thickness = perimeters * extrusion_width;
@@ -56,38 +57,38 @@ $fn = 60;
 
 /* [Hinges:] */
 
-// the type of hinging mechanism
-hinge_type = "ball"; // [none, ball, filament]
+// The type of hinging mechanism
+hinge_type = "filament"; // [none, ball, filament]
 
-// how far out the hinge protrudes from the edge of the parts
+// How far out the hinge protrudes from the edge of the parts
 hinge_depth = 6;
 
-// the width of the outside support of the hinge part. One is placed on each side of the hinge.
+// The width of the outside support of the hinge part. One is placed on each side of the hinge.
 hinge_wing = 3.5;
 
 
-// the amount of space allowed for clearance on each side of the hinge connection.
+// The amount of space allowed for clearance on each side of the hinge connection.
 hinge_clearance = 0.3;
 
-// space added to the hinge extending from the bottom of the lid, provides space for the lid to close fully
+// Space added to the hinge extending from the bottom of the lid, provides space for the lid to close fully
 hinge_lid_clearance = 0.2;
 
 
 // Adds extra clearance for the the parts that contain the lid. I've found that this part prints a bit too tight compared to the other slots, due to the three-sided vertical support, rather than two-sided, like the others.
-hinge_lid_slot_extra_clearance = 0.1;
+hinge_lid_slot_extra_clearance = .1;
 
 hinge_inside_length = side_length - (hinge_wing + hinge_clearance) * 2;
 
-// multiplied by hinge_depth to determine the diameter of the ball used for ball hinges. You may need to increase the Hinge Ball Pullback as this ratio is increased
+// Multiplied by hinge_depth to determine the diameter of the ball used for ball hinges. You may need to increase the Hinge Ball Pullback as this ratio is increased
 hinge_ball_ratio = 0.7;
 
-// the size of the ball that is used for ball hinges
+// The size of the ball that is used for ball hinges
 hinge_ball = hinge_depth * hinge_ball_ratio;
 
-// the amount by which the indentation is increased to provide some clearance between the ball and the indentation
+// The amount by which the indentation is increased to provide some clearance between the ball and the indentation
 hinge_ball_clearance = .2;
 
-// the percentage that the ball is protruding, or used to create the indentation. 0 represents a full half of the ball is protruding. 1 represents the ball not protruding at all
+// The percentage that the ball is protruding, or used to create the indentation. 0 represents a full half of the ball is protruding. 1 represents the ball not protruding at all
 hinge_ball_pullback = .4;
 
 hinge_filament_hole = 1.75 + .2;
@@ -106,6 +107,12 @@ module slot() {
     translate([wall_thickness, wall_thickness, wall_thickness])
     cube([slot_thickness, side_length, height]);
 }
+
+
+
+// hiding this down here so it's not in the customizer
+$fn = 60;
+
 
 module bottom_corner_triangle_shape() {
     polygon(
