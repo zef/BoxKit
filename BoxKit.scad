@@ -342,8 +342,7 @@ module hinge_knuckle_outside(extended=true) {
                 // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
                 distance = min(wall_thickness, edge_corner_round);
 
-                // where does this .5 come from? It's not half the distance, not sure why I need it...
-                move(z=side_length, x=hinge_wing - distance+.5)
+                move(z=side_length, x=hinge_depth/2)
                 rotate([90,90,90])
                 linear_extrude(distance)
                 projection() yrot(90) hinge_knuckle_outside(extended=false);
