@@ -439,6 +439,8 @@ module corner_hinge_set() {
     xmove(-side_length/4)
     yflip_copy() ymove(-bed_spacing - side_length)
     xdistribute(hinge_depth * 2 + bed_spacing) {
+        // lid front corners
+        move(y=side_length, x=bed_spacing * 2) yflip() yrot(270) lid_corner();
         ymove(side_length) yflip() lid_corner_hinge();
         top_corner_hinge();
     }
