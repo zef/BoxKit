@@ -16,7 +16,7 @@ use <BOSL/shapes.scad>
 // bottom
 
 // What do you want to print?
-print_parts = "box"; //[box, hinged box, top corners 2x, top corners 4x, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap]
+print_parts = "box"; //[box, hinged box, top corner pair, top corner set, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap]
 
 
 /* [Basic Dimensions:] */
@@ -32,7 +32,8 @@ side_length = 20;
 // How tall the corner parts are
 height = 12;
 
-
+// How much rounding to apply to the corners
+corner_radius = 0.8;
 
 /* [3d Printer Configuration:] */
 
@@ -43,23 +44,19 @@ perimeters = 3;
 extrusion_width = 0.45;
 
 
+/* [Bottom Corners:] */
+
+// Instead of leaving a completely flat bottom, this creates slots for the side walls to sit inside, and a ledge that elevates the base panel by this amount
+ledge_height = 0;
+
 
 
 // The wall thickness determines:
 // - the thickness of vertical walls that surround the stock
 // - the thickness of the
 wall_thickness = perimeters * extrusion_width;
-
-// this affects the bottom corner piece only
-// Instead of leaving a completely flat bottom, this creates a ledge,
-// creating a more solid slot for the side walls to sit inside, and elevating the base of the entire tray by this amount
-insideHeight = 0;
-
 slot_thickness = stock_thickness + clearance;
 total_wall = (wall_thickness * 2) + slot_thickness;
-
-// How much rounding to apply to the corners
-edge_corner_round = 1;
 
 // interlock = true;
 
@@ -79,7 +76,7 @@ hinge_wing = 3.5;
 hinge_clearance = 0.3;
 
 // Space added to the hinge extending from the bottom of the lid, provides space for the lid to close fully
-hinge_lid_clearance = 0.2;
+hinge_lid_clearance = 0.4;
 
 
 // Adds extra clearance for the the parts that contain the lid. I've found that this part prints a bit too tight compared to the other slots, due to the three-sided vertical support, rather than two-sided, like the others.
@@ -99,7 +96,23 @@ hinge_ball_clearance = .2;
 // The percentage that the ball is protruding, or used to create the indentation. 0 represents a full half of the ball is protruding. 1 represents the ball not protruding at all
 hinge_ball_pullback = .4;
 
-hinge_filament_hole = 1.75 + .2;
+// The diameter used for the filament hinge hole. Default is 1.75 filament, + .2 clearance.
+hinge_filament_hole = 1.95;
+
+
+/* [Magnets!:] */
+
+// Do you want to embed magnets in the back of your corner pieces? Note that with hinged boxes, the front of the box must be the magnetic side.
+magnets_on = true;
+
+// What diameter are the magnets?
+magnet_diameter = 8;
+
+// How much clearance should the magnet hole have?
+magnet_clearance = 0.1;
+
+// How thick are the magnets? If they are deeper than the thickness of the walls, the hole will go all the way through the wall.
+magnet_thickness = 10;
 
 
 /* [Edge Caps:] */
@@ -133,11 +146,11 @@ $fn = 60;
 module bottom_corner_triangle_shape() {
     polygon(
         polyRound([
-            [0,0, edge_corner_round],
-            [0, side_length, edge_corner_round],
-            [total_wall, side_length, edge_corner_round],
-            [side_length, total_wall, edge_corner_round],
-            [side_length, 0, edge_corner_round]
+            [0,0, corner_radius],
+            [0, side_length, corner_radius],
+            [total_wall, side_length, corner_radius],
+            [side_length, total_wall, corner_radius],
+            [side_length, 0, corner_radius]
         ])
     );
 }
@@ -145,18 +158,30 @@ module bottom_corner_triangle_shape() {
 module corner_shape() {
     polygon(
         polyRound([
-            [0,0, edge_corner_round],
-            [0, side_length, edge_corner_round],
-            [total_wall, side_length, edge_corner_round],
-            [total_wall, total_wall, edge_corner_round],
-            [side_length, total_wall, edge_corner_round],
-            [side_length, 0, edge_corner_round]
+            [0,0, corner_radius],
+            [0, side_length, corner_radius],
+            [total_wall, side_length, corner_radius],
+            [total_wall, total_wall, corner_radius],
+            [side_length, total_wall, corner_radius],
+            [side_length, 0, corner_radius]
         ])
     );
 }
 
+module magnet() {
+    if (magnets_on) {
+        // get rid of OpenSCAD artifact
+        pull = .2;
+        magnet_diameter = magnet_diameter + magnet_clearance;
 
-module bottom_corner(interlock=false) {
+        magnet_thickness = min(magnet_thickness, wall_thickness) + pull;
+        move(x=magnet_thickness/2 - pull/2, y=side_length/2, z=height/2)
+        xcyl(l=magnet_thickness, d=magnet_diameter);
+    }
+}
+
+module bottom_corner(interlock=false, magnets=false) {
+
     difference() {
         linear_extrude(height) {
             bottom_corner_triangle_shape();
@@ -167,7 +192,11 @@ module bottom_corner(interlock=false) {
         zrot(270) left(total_wall) slot();
 
         // flatten out inside ledge, providing suppport for the bottom part
-        translate([slot_thickness, slot_thickness, wall_thickness + insideHeight]) cube([side_length, side_length, height]);
+        translate([slot_thickness, slot_thickness, wall_thickness + ledge_height]) cube([side_length, side_length, height]);
+
+        if (magnets) {
+            magnet();
+        }
 
         if (interlock) {
             interlock();
@@ -176,7 +205,7 @@ module bottom_corner(interlock=false) {
 }
 
 
-module top_corner(interlock=false) {
+module top_corner(interlock=false, magnets=false) {
     union() {
         difference() {
             linear_extrude(height) {
@@ -185,6 +214,10 @@ module top_corner(interlock=false) {
 
             slot();
             zrot(270) left(total_wall) slot();
+
+            if (magnets) {
+                magnet();
+            }
         };
 
         if (interlock) {
@@ -311,7 +344,7 @@ module hinge_shape_top() {
 }
 
 module hinge_shape_bottom() {
-    // top corner, where circle needs to be joined to the corner
+    // top inside corner, where the circle needs to be joined to the box corner
     square([hinge_depth/2, hinge_depth/2]);
 
     // the circle that defines the center of rotation, and size of the hinge
@@ -340,7 +373,7 @@ module hinge_knuckle_outside(extended=true) {
             if (extended) {
                 // now we take a projection of the side that goes against the body of the piece
                 // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
-                distance = min(wall_thickness, edge_corner_round);
+                distance = min(wall_thickness, corner_radius);
 
                 move(z=side_length, x=hinge_depth/2)
                 rotate([90,90,90])
@@ -368,7 +401,7 @@ module hinge_knuckle_inside(flat_hinge=false) {
 
     // add base that will be added to the flat corner
     move(x=-hinge_depth/2, y=hinge_depth/2)
-    cuboid([hinge_depth + edge_corner_round,cube_thickness,side_length], fillet=edge_corner_round, edges=round_edges, center=false);
+    cuboid([hinge_depth + corner_radius,cube_thickness,side_length], fillet=corner_radius, edges=round_edges, center=false);
 }
 
 
@@ -401,7 +434,7 @@ module top_corner_hinge() {
 module edge_cap(length=side_length, height=height, tall=false) {
     difference() {
         cap_height = tall ? height + wall_thickness : height;
-        cuboid([total_wall,length,cap_height], fillet=edge_corner_round, edges=EDGES_Z_ALL, center=false);
+        cuboid([total_wall,length,cap_height], fillet=corner_radius, edges=EDGES_Z_ALL, center=false);
 
         // the - .5 and the + 1 are to get rid of the visual artifact from the OpenSCAD difference implementation when the items share an outside plane
         z_offset = tall ? wall_thickness * 2 : wall_thickness;
@@ -456,12 +489,25 @@ module flat_hinge_set() {
 
 module bottom_corners(spacing=bed_spacing) {
     distance = (side_length) + spacing;
-    rot_copies(n=4, delta = [distance,distance,0]) zrot(180) bottom_corner();
+    xdistribute(-side_length * 2 - spacing) {
+        xflip() yflip_copy(offset=-distance) bottom_corner();
+        yflip_copy(offset=-distance) bottom_corner(magnets=true);
+    }
+//    rot_copies(n=2, delta = [distance,distance,0]) zrot(180) bottom_corner();
 }
 
-module top_corners(count=4) {
-    rot_copies(n=count, delta = [total_wall,(side_length + total_wall + total_wall)/2 + bed_spacing,0])
-    zrot(180) xmove(-(side_length-total_wall-total_wall)/2) top_corner();
+// `magnets` determinse whether magnets sholuld be shown, but only if the master magnets_on is also true.
+module top_corner_pair(magnets=false) {
+    // this is implemented to mirror the parts so that magnetic parts are correctly printed
+    total_length = side_length + (total_wall + bed_spacing)*2;
+    move(x=-total_length/2, y= -side_length/2) {
+        move(x=total_length, y=side_length) yflip() zrot(90) top_corner(magnets=magnets);
+        top_corner(magnets=magnets);
+    }
+}
+module top_corner_set() {
+    top_corner_pair();
+    zrot(90) top_corner_pair(magnets=true);
 }
 
 
@@ -470,7 +516,7 @@ quadrant_spacing = side_length * 2 + bed_spacing * 6;
 if (print_parts == "box") {
     ydistribute(quadrant_spacing) {
         bottom_corners();
-        top_corners();
+        top_corner_set();
     }
 }
 
@@ -478,16 +524,16 @@ if (print_parts == "hinged box") {
     ydistribute(quadrant_spacing) {
         bottom_corners();
         corner_hinge_set();
-        top_corners(2);
+        top_corner_pair(magnets=true);
     }
 }
 
-if (print_parts == "top corners 2x") {
-    top_corners(2);
+if (print_parts == "top corner pair") {
+    top_corner_pair(magnets=true);
 }
 
-if (print_parts == "top corners 4x") {
-    top_corners();
+if (print_parts == "top corner set") {
+    top_corner_set();
 }
 
 if (print_parts == "bottom corners") {
