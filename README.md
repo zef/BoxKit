@@ -87,12 +87,6 @@ Feature ideas:
   into a cavity that is printed into the bottom of the bottom-corner part.
 
 
-- edge cap — small part that covers top exposed edges. having one on the top of
-  a box and one on the lid would close off the gaps in a lidded box.
-  Nice idea, or wasteful?
-
-
-
 ## A note about sourcing materials
 
 For me, the sheet goods are acquired freely, very cheaply, or are smaller scrap

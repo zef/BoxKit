@@ -19,7 +19,7 @@ use <BOSL/shapes.scad>
 print_parts = "box"; //[box, hinged box, top corner pair, top corner set, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap]
 
 
-/* [Basic Dimensions:] */
+/* [Basic Dimensions] */
 // The "stock" refers to the panel material that will make up the sides of the box
 stock_thickness = 3;
 
@@ -35,7 +35,7 @@ height = 12;
 // How much rounding to apply to the corners
 corner_radius = 0.8;
 
-/* [3d Printer Configuration:] */
+/* [Wall Thickness and 3d Printer Configuration] */
 
 // The number of perimeters your printer will use to create the sidewalls. This determines the thickness of the plastic surrounding the stock.
 perimeters = 3;
@@ -44,7 +44,7 @@ perimeters = 3;
 extrusion_width = 0.45;
 
 
-/* [Bottom Corners:] */
+/* [Bottom Corners] */
 
 // Instead of leaving a completely flat bottom, this creates slots for the side walls to sit inside, and a ledge that elevates the base panel by this amount
 ledge_height = 0;
@@ -60,7 +60,7 @@ total_wall = (wall_thickness * 2) + slot_thickness;
 
 // interlock = true;
 
-/* [Hinges:] */
+/* [Hinges] */
 
 // The type of hinging mechanism
 hinge_type = "filament"; // [none, ball, filament]
@@ -100,7 +100,7 @@ hinge_ball_pullback = .4;
 hinge_filament_hole = 1.95;
 
 
-/* [Magnets!:] */
+/* [Magnets!] */
 
 // Do you want to embed magnets in the back of your corner pieces? Note that with hinged boxes, the front of the box must be the magnetic side.
 magnets_on = true;
@@ -109,13 +109,13 @@ magnets_on = true;
 magnet_diameter = 8;
 
 // How much clearance should the magnet hole have?
-magnet_clearance = 0.1;
+magnet_clearance = 0.15;
 
 // How thick are the magnets? If they are deeper than the thickness of the walls, the hole will go all the way through the wall.
 magnet_thickness = 10;
 
 
-/* [Edge Caps:] */
+/* [Edge Caps] */
 
 // How long do you want the edge cap to be? This should be the "empty" space left between the corners on your box.
 edge_cap_length = 40;
