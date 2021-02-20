@@ -12,8 +12,6 @@ use <BOSL/shapes.scad>
 
 /* [Part Selections:] */
 
-// bottom
-
 // What do you want to print?
 print_parts = "box"; //[box, hinged box, top corner pair, top corner set, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap, lid latch]
 
@@ -57,7 +55,6 @@ wall_thickness = perimeters * extrusion_width;
 slot_thickness = stock_thickness + clearance;
 total_wall = (wall_thickness * 2) + slot_thickness;
 
-// interlock = true;
 
 /* [Hinges] */
 
@@ -128,7 +125,7 @@ edge_cap_tall = false;
 // How wide do you want the latching mechanism to be?
 latch_length = 12;
 
-// how wide you want the edge cap attached to the latch to be?
+// How wide you want the edge cap attached to the latch to be?
 latch_edge_cap_length = 40;
 
 // How much extra space should be given to the latch for clearance?
@@ -153,10 +150,8 @@ module slot() {
 }
 
 
-
 // hiding this down here so it's not in the customizer
 $fn = 60;
-
 
 module bottom_corner_triangle_shape() {
     polygon(
@@ -255,6 +250,8 @@ module 4_way() {
     }
 }
 
+
+// an idea for a shelf holder plate
 //module back_plate(side=10) {
 //    plate_height = side * .6;
 //
@@ -480,12 +477,11 @@ module flat_hinge_knuckle_outside() {
 // the lid latch part attaches to the lid of the box
 // and is meant to snap onto an edge_cap piece
 module lid_latch() {
-    
     if (latch_include_edge_cap) {
         xmove(-total_wall - bed_spacing)
         edge_cap(length=latch_edge_cap_length, height=total_wall);
     }
-    
+
     union() {
         edge_cap(length=latch_edge_cap_length, height=total_wall);
 
@@ -498,7 +494,6 @@ module lid_latch() {
 }
 
 module lid_latch_shape() {
-    
     // in the way we have it oriented, you can think of the polygon coordinates as [x, z, rounding]
     polygon(
         polyRound([
@@ -512,7 +507,6 @@ module lid_latch_shape() {
             [total_wall + wall_thickness + latch_clearance, wall_thickness * 2, .2],
             // the bottom of the latching point. Coming back a tiny bit here to create a negative slope.
             [total_wall + wall_thickness + latch_clearance + .2, wall_thickness, 0],
-    
             // end at corner of slot, right above the start point
             [0, wall_thickness, 0],
         ])
@@ -554,7 +548,6 @@ module bottom_corners(spacing=bed_spacing) {
         xflip() yflip_copy(offset=-distance) bottom_corner();
         yflip_copy(offset=-distance) bottom_corner(magnets=true);
     }
-//    rot_copies(n=2, delta = [distance,distance,0]) zrot(180) bottom_corner();
 }
 
 // `magnets` determinse whether magnets sholuld be shown, but only if the master magnets_on is also true.
@@ -576,6 +569,7 @@ quadrant_spacing = side_length * 2 + bed_spacing * 6;
 
 if (print_parts == "box") {
     ydistribute(quadrant_spacing) {
+
         bottom_corners();
         top_corner_set();
     }
@@ -626,13 +620,4 @@ if (print_parts == "edge cap") {
 if (print_parts == "lid latch") {
     lid_latch();
 }
-
-
-//xdistribute(quadrant_spacing) {
-//    ydistribute(quadrant_spacing) {
-//    }
-//    ydistribute(quadrant_spacing) {
-//    }
-//}
-
 
