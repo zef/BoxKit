@@ -502,9 +502,9 @@ module lid_latch_shape() {
             // move to the bottom end of the latch
             [total_wall * 2 + wall_thickness, 0, 0.2],
             // come up and over a bit, towards the ledge, providing a nice rounding point
-            [total_wall * 2, wall_thickness*.9, wall_thickness*2],
+            [total_wall * 2, wall_thickness * .9, 1],
             // this creates the latching point, where the corner slips over the edge cap
-            [total_wall + wall_thickness + latch_clearance, wall_thickness * 2, .2],
+            [total_wall + wall_thickness + latch_clearance, wall_thickness * 1.7, .2],
             // the bottom of the latching point. Coming back a tiny bit here to create a negative slope.
             [total_wall + wall_thickness + latch_clearance + .2, wall_thickness, 0],
             // end at corner of slot, right above the start point
