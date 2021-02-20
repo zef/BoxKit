@@ -3,7 +3,6 @@
 
 // https://github.com/Irev-Dev/Round-Anything
 include <Round-Anything/polyround.scad>
-include <Round-Anything/MinkowskiRound.scad>
 
 // https://github.com/revarbat/BOSL/wiki
 include <BOSL/constants.scad>
@@ -16,7 +15,7 @@ use <BOSL/shapes.scad>
 // bottom
 
 // What do you want to print?
-print_parts = "box"; //[box, hinged box, top corner pair, top corner set, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap]
+print_parts = "box"; //[box, hinged box, top corner pair, top corner set, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap, lid latch]
 
 
 /* [Basic Dimensions] */
@@ -122,6 +121,21 @@ edge_cap_length = 40;
 
 // Make the edge cap taller, so it will fill the gap left by the lid above the box. You can print a separate edge cap for the lid, or set this to true to print only one edge cap that fills both gaps.
 edge_cap_tall = false;
+
+/* [Latches] */
+
+// How wide do you want the latching mechanism to be?
+latch_length = 12;
+
+// how wide you want the edge cap attached to the latch to be?
+latch_edge_cap_length = 40;
+
+// How much extra space should be given to the latch for clearance?
+latch_clearance = 0.1;
+
+// Do you want to print an extra edge cap for the bottom of the box? One is needed for the latch to catch on.
+latch_include_edge_cap = true;
+
 
 
 echo("<b>Wall: ", wall_thickness);
@@ -462,6 +476,48 @@ module flat_hinge_knuckle_outside() {
 }
 
 
+// the lid latch part attaches to the lid of the box
+// and is meant to snap onto an edge_cap piece
+module lid_latch() {
+    
+    if (latch_include_edge_cap) {
+        xmove(-total_wall - bed_spacing)
+        edge_cap(length=latch_edge_cap_length, height=total_wall);
+    }
+    
+    union() {
+        edge_cap(length=latch_edge_cap_length, height=total_wall);
+
+        move(x=total_wall-wall_thickness, y=(latch_edge_cap_length + latch_length)/2)
+        xrot(90)
+        linear_extrude(latch_length) {
+            lid_latch_shape();
+        }
+    }
+}
+
+module lid_latch_shape() {
+    
+    // in the way we have it oriented, you can think of the polygon coordinates as [x, z, rounding]
+    polygon(
+        polyRound([
+            // start at bottom of edge cap, right where the slot ends
+            [0,0,0],
+            // move to the bottom end of the latch
+            [total_wall * 2 + wall_thickness, 0, 0.2],
+            // come up and over a bit, towards the ledge, providing a nice rounding point
+            [total_wall * 2, wall_thickness*.9, wall_thickness*2],
+            // this creates the latching point, where the corner slips over the edge cap
+            [total_wall + wall_thickness + latch_clearance, wall_thickness * 2, .2],
+            // the bottom of the latching point. Coming back a tiny bit here to create a negative slope.
+            [total_wall + wall_thickness + latch_clearance + .2, wall_thickness, 0],
+    
+            // end at corner of slot, right above the start point
+            [0, wall_thickness, 0],
+        ])
+    );
+}
+
 /////////////////////////////
 // Printable Sets
 /////////////////////////////
@@ -558,6 +614,10 @@ if (print_parts == "hinges only — flat") {
 
 if (print_parts == "edge cap") {
     ymove(-edge_cap_length/2) edge_cap(height=total_wall, length=edge_cap_length, tall=edge_cap_tall);
+}
+
+if (print_parts == "lid latch") {
+    lid_latch();
 }
 
 
