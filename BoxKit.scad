@@ -128,7 +128,7 @@ edge_cap_tall = false;
 latch_length = 12;
 
 // How wide you want the edge cap attached to the latch to be?
-latch_edge_cap_length = 40;
+latch_edge_cap_length = 20;
 
 // How much extra space should be given to the latch for clearance?
 latch_clearance = 0.1;
