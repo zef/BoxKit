@@ -78,18 +78,15 @@ hinge_clearance = 0.3;
 hinge_lid_clearance = 0.4;
 
 
-// Adds extra clearance for the the parts that contain the lid. I've found that this part prints a bit too tight compared to the other slots, due to the three-sided vertical support, rather than two-sided, like the others.
-hinge_lid_slot_extra_clearance = .1;
-
 hinge_inside_length = side_length - (hinge_wing + hinge_clearance) * 2;
 
 // Multiplied by hinge_depth to determine the diameter of the ball used for ball hinges. You may need to increase the Hinge Ball Pullback as this ratio is increased
-hinge_ball_ratio = 0.7;
+hinge_ball_ratio = 0.6;
 
 // The size of the ball that is used for ball hinges
 hinge_ball = hinge_depth * hinge_ball_ratio;
 
-// The amount by which the indentation is increased to provide some clearance between the ball and the indentation
+// The amount — in mm added to the diameter — by which the indentation is increased to provide some clearance between the ball and the indentation
 hinge_ball_clearance = .2;
 
 // The percentage that the ball is protruding, or used to create the indentation. 0 represents a full half of the ball is protruding. 1 represents the ball not protruding at all
@@ -98,11 +95,15 @@ hinge_ball_pullback = .4;
 // The diameter used for the filament hinge hole. Default is 1.75 filament, + .2 clearance.
 hinge_filament_hole = 1.95;
 
+// Adds extra clearance for the the parts that contain the lid. I've found that this part prints a bit too tight compared to the other slots, due to the three-sided vertical support, rather than two-sided, like the others.
+hinge_lid_slot_extra_clearance = .1;
+
+
 
 /* [Magnets!] */
 
 // Do you want to embed magnets in the back of your corner pieces? Note that with hinged boxes, the front of the box must be the magnetic side.
-magnets_on = true;
+magnets_on = false;
 
 // What diameter are the magnets?
 magnet_diameter = 8;

@@ -102,3 +102,8 @@ I encourage you to use reclaimed materials where possible!
 
 
 https://www.amazon.com/gp/product/B0006IUWCM?tag=zef08-20
+
+### Known Issues
+
+- some part layouts do not behave properly when exaggerated dimensions are used.
+  I think in normal usage this shuold be ok, but let me know otherwise.
