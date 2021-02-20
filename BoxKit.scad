@@ -526,14 +526,18 @@ module lid_latch_shape() {
 bed_spacing = 2;
 
 module corner_hinge_set() {
-    xmove(-side_length/4)
-    yflip_copy() ymove(-bed_spacing - side_length)
-    xdistribute(hinge_depth * 2 + bed_spacing) {
-        // lid front corners
-        move(y=side_length, x=bed_spacing * 2) yflip() yrot(270) lid_corner();
-        ymove(side_length) yflip() lid_corner_hinge();
+    yflip_copy() ymove(-bed_spacing - side_length) {
+        xmove(-hinge_depth * 2 - bed_spacing)
+        lid_corner_hinge();
         top_corner_hinge();
     }
+
+    move(y=-side_length/2, x=total_wall * 2 + bed_spacing)
+    yrot(270) lid_corner();
+
+    move(y=side_length/2, x=total_wall * 3 + bed_spacing * 2)
+    yflip() yrot(270) lid_corner();
+
 }
 
 module flat_hinge_set() {
@@ -554,9 +558,9 @@ module bottom_corners(spacing=bed_spacing) {
 }
 
 // `magnets` determinse whether magnets sholuld be shown, but only if the master magnets_on is also true.
-module top_corner_pair(magnets=false) {
+module top_corner_pair(magnets=false, close=false) {
     // this is implemented to mirror the parts so that magnetic parts are correctly printed
-    total_length = side_length + (total_wall + bed_spacing)*2;
+    total_length = close ? (side_length + total_wall + bed_spacing) : (side_length + (total_wall + bed_spacing)*2);
     move(x=-total_length/2, y= -side_length/2) {
         move(x=total_length, y=side_length) yflip() zrot(90) top_corner(magnets=magnets);
         top_corner(magnets=magnets);
@@ -579,14 +583,16 @@ if (print_parts == "box") {
 
 if (print_parts == "hinged box") {
     ydistribute(quadrant_spacing) {
-        bottom_corners();
+        union() {
+            bottom_corners(total_wall);
+            zrot(45) top_corner_pair(magnets=true, close=true);
+        }
         corner_hinge_set();
-        top_corner_pair(magnets=true);
     }
 }
 
 if (print_parts == "top corner pair") {
-    top_corner_pair(magnets=true);
+    top_corner_pair(magnets=true, close=true);
 }
 
 if (print_parts == "top corner set") {
