@@ -29,7 +29,7 @@ side_length = 20;
 // How tall the corner parts are
 height = 12;
 
-// How much rounding to apply to the corners
+// How much rounding to apply to the corners. Will not apply rounding greater than the wall_thickness, which is calculated in the next section.
 corner_radius = 0.8;
 
 /* [Wall Thickness and 3d Printer Configuration] */
@@ -138,10 +138,14 @@ latch_include_edge_cap = true;
 
 
 
+
+
+radius = min(corner_radius, wall_thickness);
+
+
 echo("<b>Wall: ", wall_thickness);
 echo("<b>Total Wall: ", total_wall);
-
-
+echo("<b>Calculated Corner Radius: ", radius);
 
 // could do some parameter validation, but may be fine to leave that to the user
 
@@ -158,11 +162,11 @@ $fn = 60;
 module bottom_corner_triangle_shape() {
     polygon(
         polyRound([
-            [0,0, corner_radius],
-            [0, side_length, corner_radius],
-            [total_wall, side_length, corner_radius],
-            [side_length, total_wall, corner_radius],
-            [side_length, 0, corner_radius]
+            [0,0, radius],
+            [0, side_length, radius],
+            [total_wall, side_length, radius],
+            [side_length, total_wall, radius],
+            [side_length, 0, radius]
         ])
     );
 }
@@ -170,12 +174,12 @@ module bottom_corner_triangle_shape() {
 module corner_shape() {
     polygon(
         polyRound([
-            [0,0, corner_radius],
-            [0, side_length, corner_radius],
-            [total_wall, side_length, corner_radius],
-            [total_wall, total_wall, corner_radius],
-            [side_length, total_wall, corner_radius],
-            [side_length, 0, corner_radius]
+            [0,0, radius],
+            [0, side_length, radius],
+            [total_wall, side_length, radius],
+            [total_wall, total_wall, radius],
+            [side_length, total_wall, radius],
+            [side_length, 0, radius]
         ])
     );
 }
@@ -387,7 +391,7 @@ module hinge_knuckle_outside(extended=true) {
             if (extended) {
                 // now we take a projection of the side that goes against the body of the piece
                 // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
-                distance = min(wall_thickness, corner_radius);
+                distance = min(wall_thickness, radius);
 
                 move(z=side_length, x=hinge_depth/2)
                 rotate([90,90,90])
@@ -415,7 +419,7 @@ module hinge_knuckle_inside(flat_hinge=false) {
 
     // add base that will be added to the flat corner
     move(x=-hinge_depth/2, y=hinge_depth/2)
-    cuboid([hinge_depth + corner_radius,cube_thickness,side_length], fillet=corner_radius, edges=round_edges, center=false);
+    cuboid([hinge_depth + radius,cube_thickness,side_length], fillet=radius, edges=round_edges, center=false);
 }
 
 
@@ -448,7 +452,7 @@ module top_corner_hinge() {
 module edge_cap(length=side_length, height=height, tall=false) {
     difference() {
         cap_height = tall ? height + wall_thickness : height;
-        cuboid([total_wall,length,cap_height], fillet=corner_radius, edges=EDGES_Z_ALL, center=false);
+        cuboid([total_wall,length,cap_height], fillet=radius, edges=EDGES_Z_ALL, center=false);
 
         // the - .5 and the + 1 are to get rid of the visual artifact from the OpenSCAD difference implementation when the items share an outside plane
         z_offset = tall ? wall_thickness * 2 : wall_thickness;
