@@ -13,12 +13,12 @@ use <BOSL/shapes.scad>
 /* [Part Selections:] */
 
 // What do you want to print?
-print_parts = "box"; //[box, hinged box, top corner pair, top corner set, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap, lid latch]
+print_parts = "tray"; //[tray, box with hinged lid, top corner pair, top corner set, bottom corners, 3-way divider, 4-way divider, hinges only — corners, hinges only — flat, edge cap, lid latch]
 
 
 /* [Basic Dimensions] */
-// The "stock" refers to the panel material that will make up the sides of the box
-stock_thickness = 3;
+// The "stock" refers to the panel material that you are using
+stock_thickness = 3.0; // [10.1]
 
 // How much space is added to the stock thickness to create slots where your stock is inserted
 clearance = 0.1;
@@ -574,7 +574,7 @@ module top_corner_set() {
 
 quadrant_spacing = side_length * 2 + bed_spacing * 6;
 
-if (print_parts == "box") {
+if (print_parts == "tray") {
     ydistribute(quadrant_spacing) {
 
         bottom_corners();
@@ -582,7 +582,7 @@ if (print_parts == "box") {
     }
 }
 
-if (print_parts == "hinged box") {
+if (print_parts == "box with hinged lid") {
     ydistribute(quadrant_spacing) {
         union() {
             bottom_corners(total_wall);
