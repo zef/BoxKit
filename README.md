@@ -34,7 +34,7 @@ No coding is required for changing parameters due to the Customizer, which
 allows configuration through a friendly interface.
 
 
-### Process
+## Process
 
 Steps to create a box include:
 
@@ -43,7 +43,7 @@ Steps to create a box include:
 - cutting panels to size
 - assembling
 
-## Sourcing Materials
+### Sourcing Materials
 
 For me, a large part of the motivation for this project is that I had a lot of
 the freely-acquired clear acrylic that was bound for the trash before I got it.
@@ -64,7 +64,7 @@ making something useful out of "trash" is important, and has value that goes
 beyond a simple monetary calculation, though it can also be very economical.
 
 
-#### 3d Part Configuration
+### 3d Part Configuration
 
 All dimensions are in mm.
 
@@ -78,14 +78,14 @@ is good for larger boxes and trays, but 2p is quite good too and uses only about
 In my testing on a 3mm panel, a clearance of -.1 works well with 2p panels,
 while a clearance of .1 works well with 3p panels.
 
-#### Cutting Panels
+### Cutting Panels
 
 When making a box or tray, I like to have the bottom of the box completely inset
 inside the walls of the box. I will expand on this process later, but for now,
 it is an exercise for the reader. Stay safe — don't make any cuts that you're not
 comfortable with. I'm sure you'll figure it out. ;)
 
-#### Assembly
+### Assembly
 
 I like to get everything lined up and test fit before starting the gluing
 process, then go around and glue a corner at a time, top corners first. Then
