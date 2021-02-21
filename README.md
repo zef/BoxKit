@@ -16,15 +16,14 @@ bins.
 I would like to make a video explaining and demonstrating some of the features
 and process. Coming soon, I hope!
 
----
-
 ### Flexible, Modular, and Customizable
 
 Quickly print a set of corners that will allow you to assemble a box of any
 size.
 
 Choose a simple tray or a box with a hinged lid. Optional features include
-lid latches, magnets, independent hinges, and other configurable options.
+lid latches, magnets, independent hinges, and other configurable options, [as
+detailed below](#boxkit-parts).
 
 Parameters such as the thickness of the material, side length, height, hinge
 configuration, and many other configuration options are available.
@@ -35,14 +34,35 @@ No coding is required for changing parameters due to the Customizer, which
 allows configuration through a friendly interface.
 
 
-### Process and Assembly
+### Process
 
 Steps to create a box include:
 
-- [sourcing materials](#sourcing-materials)
+- sourcing materials
 - configuring and printing parts
 - cutting panels to size
 - assembling
+
+## Sourcing Materials
+
+For me, a large part of the motivation for this project is that I had a lot of
+the freely-acquired clear acrylic that was bound for the trash before I got it.
+
+I can frequently find acrylic sheet scraps for free from a local plastics
+supplier that throws out smaller offcuts in a bin next to their dumpster. You
+can probably find something like this too!
+
+I also think it could be a good use of smaller scrap offcuts of thin sheet goods
+like MDF or plywood that you may have lying around the shop, or are able to
+reclaim for free from somewhere.
+
+I can often find such materials very cheaply at a local used building materials
+yard, such as a [Habitat ReStore](https://www.habitat.org/restores), or similar.
+
+I encourage you to use reclaimed materials where possible! Reducing waste and
+making something useful out of "trash" is important, and has value that goes
+beyond a simple monetary calculation, though it can also be very economical.
+
 
 #### 3d Part Configuration
 
@@ -62,7 +82,8 @@ while a clearance of .1 works well with 3p panels.
 
 When making a box or tray, I like to have the bottom of the box completely inset
 inside the walls of the box. I will expand on this process later, but for now,
-it is an exercise for the reader. I'm sure you'll figure it out. ;)
+it is an exercise for the reader. Stay safe — don't make any cuts that you're not
+comfortable with. I'm sure you'll figure it out. ;)
 
 #### Assembly
 
@@ -139,6 +160,7 @@ The hinge type can be configured as:
 
 A pinned hinge, using a piece of filament as the pin. This is a very simple way
 to create a nicely operating hinge that is less finicky than the "ball" hinge.
+This is my preference.
 
 #### Ball:
 
@@ -159,7 +181,6 @@ to fully cover the top edges of the box.
 
 There is also an `edge cap tall` option that is explained in the Customizer.
 
-
 ### Lid Latch
 
 A Lid Latch can be added to create a securely closing lid. Due to the printing
@@ -172,7 +193,6 @@ ideas but haven't had time to implement and test them yet.
 
 The latch is an add-on to the edge cap part, so it can be printed on top of an
 edge cap of variable width, allowing you to create a more enclosed box.
-
 
 ### Dividers
 
@@ -227,25 +247,6 @@ Modify and contribute improvements, new ideas, and new features!
 
 [1]: https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Using_OpenSCAD_in_a_command_line_environment
 
-
-## Sourcing Materials
-
-For me, a large part of the motivation for this project is that I had a lot of
-the freely-acquired clear acrylic that was bound for the trash before I got it.
-
-I can frequently find acrylic sheet scraps for free from a local plastics
-supplier that throws out smaller offcuts in a bin next to their dumpster.
-
-I also think it could be a good use of smaller scrap offcuts of thin sheet goods
-like MDF or plywood that you may have lying around the shop, or are able to
-reclaim for free from somewhere.
-
-I can often find such materials very cheaply at a local used building materials
-yard, such as a [Habitat ReStore](https://www.habitat.org/restores), or similar.
-
-I encourage you to use reclaimed materials where possible! Reducing waste and
-making something useful out of "trash" is important, and has value that goes
-beyond a simple monetary calculation, though it can also be very economical.
 
 ### Known Issues
 
