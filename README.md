@@ -33,6 +33,7 @@ Modify the parameters using the [OpenSCAD](https://www.openscad.org) program.
 No coding is required for changing parameters due to the Customizer, which
 allows configuration through a friendly interface.
 
+![BoxKit Part Types](/BoxKit-Part-Types.png?raw=true)
 
 ## Process
 
@@ -77,6 +78,17 @@ is good for larger boxes and trays, but 2p is quite good too and uses only about
 
 In my testing on a 3mm panel, a clearance of -.1 works well with 2p panels,
 while a clearance of .1 works well with 3p panels.
+
+In OpenSCAD, you can choose from many options in the "print parts" selection.
+Each option displays certain parts that are generally appropriate to print
+together. However, you can use features of your slicer, such as "Split to parts"
+or "Split to objects", as in Prusa Slicer, to easily isolate a certain part and
+print just that, if desired.
+
+
+![BoxKit Configuration Options](/BoxKit-Customization.png?raw=true)
+
+
 
 ### Cutting Panels
 
