@@ -46,13 +46,6 @@ perimeters = 3;
 extrusion_width = 0.45;
 
 
-/* [Bottom Corners] */
-
-// Instead of leaving a completely flat bottom, this creates slots for the side walls to sit inside, and a ledge that elevates the base panel by this amount
-ledge_height = 0;
-
-
-
 // The wall thickness determines:
 // - the thickness of vertical walls that surround the stock
 // - the thickness of the
@@ -96,7 +89,7 @@ hinge_ball_ratio = 0.6;
 // The size of the ball that is used for ball hinges
 hinge_ball = hinge_depth * hinge_ball_ratio;
 
-// The amount — in mm added to the diameter — by which the indentation is increased to provide some clearance between the ball and the indentation
+// The amount (added to the diameter) by which the indentation is increased to provide clearance between the ball and the indentation
 hinge_ball_clearance = .2;
 
 // The percentage that the ball is protruding, or used to create the indentation. 0 represents a full half of the ball is protruding. 1 represents the ball not protruding at all
@@ -142,6 +135,10 @@ latch_clearance = 0.1;
 latch_include_edge_cap = true;
 
 
+/* [Bottom Corners] */
+
+// Instead of leaving a completely flat bottom, this creates slots for the side walls to sit inside, and a ledge that elevates the base panel by this amount
+ledge_height = 0;
 
 
 
