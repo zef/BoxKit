@@ -1,6 +1,9 @@
 // https://github.com/zef/BoxKit
 
 
+// Using some dependencies helps keep me sane. Please excuse the inconvenience of installation :)
+
+
 // https://github.com/Irev-Dev/Round-Anything
 include <Round-Anything/polyround.scad>
 
@@ -18,16 +21,18 @@ print_parts = "tray"; //[tray, box with hinged lid, top corner pair, top corner 
 
 /* [Basic Dimensions] */
 // The "stock" refers to the panel material that you are using
-stock_thickness = 3.0; // [10.1]
+stock_thickness = 3; // [0:.1:10]
+
+// the .01 here is used to allow granularity in the Customizer.
 
 // How much space is added to the stock thickness to create slots where your stock is inserted
 clearance = 0.1;
 
 // How far the arms of the bracket extend from the corner of the stock
-side_length = 20;
+side_length = 20; // [10:1:50]
 
 // How tall the corner parts are
-height = 12;
+height = 12; // [6:1:30]
 
 // How much rounding to apply to the corners. Will not apply rounding greater than the wall_thickness, which is calculated in the next section.
 corner_radius = 0.8;
@@ -105,19 +110,19 @@ hinge_ball_pullback = .4;
 magnets_on = false;
 
 // What diameter are the magnets?
-magnet_diameter = 8;
+magnet_diameter = 8; // [0:.1:20]
 
 // How much clearance should the magnet hole have?
 magnet_clearance = 0.15;
 
-// How thick are the magnets? If they are deeper than the thickness of the walls, the hole will go all the way through the wall.
-magnet_thickness = 10;
+// How thick are the magnets? If the value is set deeper than the thickness of the walls, the hole will go all the way through the wall.
+magnet_thickness = 10; // [0:.1:10]
 
 
 /* [Edge Caps] */
 
 // How long do you want the edge cap to be? This should be the "empty" space left between the corners on your box.
-edge_cap_length = 40;
+edge_cap_length = 40; // [6:1:200]
 
 // Make the edge cap taller, so it will fill the gap left by the lid above the box. You can print a separate edge cap for the lid, or set this to true to print only one edge cap that fills both gaps.
 edge_cap_tall = false;
