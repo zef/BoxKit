@@ -153,7 +153,7 @@ echo("<b>Calculated Corner Radius: ", radius);
 
 
 module slot() {
-    translate([wall_thickness, wall_thickness, wall_thickness])
+  translate([wall_thickness, wall_thickness, wall_thickness])
     cube([slot_thickness, side_length, height]);
 }
 
@@ -162,100 +162,99 @@ module slot() {
 $fn = 60;
 
 module bottom_corner_triangle_shape() {
-    polygon(
-        polyRound([
-            [0,0, radius],
-            [0, side_length, radius],
-            [total_wall, side_length, radius],
-            [side_length, total_wall, radius],
-            [side_length, 0, radius]
-        ])
+  polygon(
+      polyRound([
+        [0,0, radius],
+        [0, side_length, radius],
+        [total_wall, side_length, radius],
+        [side_length, total_wall, radius],
+        [side_length, 0, radius]
+      ])
     );
 }
 
 module corner_shape() {
-    polygon(
-        polyRound([
-            [0,0, radius],
-            [0, side_length, radius],
-            [total_wall, side_length, radius],
-            [total_wall, total_wall, radius],
-            [side_length, total_wall, radius],
-            [side_length, 0, radius]
-        ])
+  polygon(
+      polyRound([
+        [0,0, radius],
+        [0, side_length, radius],
+        [total_wall, side_length, radius],
+        [total_wall, total_wall, radius],
+        [side_length, total_wall, radius],
+        [side_length, 0, radius]
+      ])
     );
 }
 
 module magnet() {
-    if (magnets_on) {
-        // get rid of OpenSCAD artifact
-        pull = .2;
-        magnet_diameter = magnet_diameter + magnet_clearance;
+  if (magnets_on) {
+    // get rid of OpenSCAD artifact
+    pull = .2;
+    magnet_diameter = magnet_diameter + magnet_clearance;
 
-        magnet_thickness = min(magnet_thickness, wall_thickness) + pull;
-        move(x=magnet_thickness/2 - pull/2, y=side_length/2, z=height/2)
-        xcyl(l=magnet_thickness, d=magnet_diameter);
-    }
+    magnet_thickness = min(magnet_thickness, wall_thickness) + pull;
+    move(x=magnet_thickness/2 - pull/2, y=side_length/2, z=height/2)
+      xcyl(l=magnet_thickness, d=magnet_diameter);
+  }
 }
 
 module bottom_corner(interlock=false, magnets=false) {
-
-    difference() {
-        linear_extrude(height) {
-            bottom_corner_triangle_shape();
-        }
-
-        // cutout slots for panels
-        slot();
-        zrot(270) left(total_wall) slot();
-
-        // flatten out inside ledge, providing suppport for the bottom part
-        translate([slot_thickness, slot_thickness, wall_thickness + ledge_height]) cube([side_length, side_length, height]);
-
-        if (magnets) {
-            magnet();
-        }
-
-        if (interlock) {
-            interlock();
-        }
+  difference() {
+    linear_extrude(height) {
+      bottom_corner_triangle_shape();
     }
+
+    // cutout slots for panels
+    slot();
+    zrot(270) left(total_wall) slot();
+
+    // flatten out inside ledge, providing suppport for the bottom part
+    translate([slot_thickness, slot_thickness, wall_thickness + ledge_height]) cube([side_length, side_length, height]);
+
+    if (magnets) {
+      magnet();
+    }
+
+    if (interlock) {
+      interlock();
+    }
+  }
 }
 
 
 module top_corner(interlock=false, magnets=false) {
-    union() {
-        difference() {
-            linear_extrude(height) {
-                corner_shape();
-            }
+  union() {
+    difference() {
+      linear_extrude(height) {
+        corner_shape();
+      }
 
-            slot();
-            zrot(270) left(total_wall) slot();
+      slot();
+      zrot(270) left(total_wall) slot();
 
-            if (magnets) {
-                magnet();
-            }
-        };
+      if (magnets) {
+        magnet();
+      }
+    };
 
-        if (interlock) {
-            interlock();
-        }
+    if (interlock) {
+      interlock();
     }
+  }
 }
 
 module 3_way() {
-    difference() {
-        mirror_copy([0,1,0], 0, [0,(wall_thickness + slot_thickness/2),0]) top_corner();
-        forward(side_length / 2) slot();
-    }
+  difference() {
+    mirror_copy([0,1,0], 0, [0,(wall_thickness + slot_thickness/2),0]) top_corner();
+    forward(side_length / 2) slot();
+  }
 }
 
 module 4_way() {
-    difference() {
-        mirror_copy([1,0,0], 0, [(wall_thickness + slot_thickness/2),0,0]) 3_way();
-        zrot(90) forward((wall_thickness*3) + side_length/2) slot();
-    }
+  difference() {
+    mirror_copy([1,0,0], 0, [(wall_thickness + slot_thickness/2),0,0]) 3_way();
+    zrot(90) forward((wall_thickness*3) + side_length/2) slot();
+  }
 }
 
 
@@ -282,22 +281,22 @@ module 4_way() {
 //}
 
 module lid_corner() {
-    difference() {
-        linear_extrude(total_wall + hinge_lid_slot_extra_clearance) {
-            corner_shape();
-        }
+  difference() {
+    linear_extrude(total_wall + hinge_lid_slot_extra_clearance) {
+      corner_shape();
+    }
 
-        // cut out slot for shelf sheet
-        cut_depth = wall_thickness;
-        translate([cut_depth, cut_depth, wall_thickness]) cube([side_length, side_length, slot_thickness + hinge_lid_slot_extra_clearance]);
-    };
+    // cut out slot for shelf sheet
+    cut_depth = wall_thickness;
+    translate([cut_depth, cut_depth, wall_thickness]) cube([side_length, side_length, slot_thickness + hinge_lid_slot_extra_clearance]);
+  };
 }
 
 
 // old cylinder idea, never tried printing
 module interlock() {
-    radius = wall_thickness/3;
-    translate([total_wall / 2, total_wall / 2, 0])
+  radius = wall_thickness/3;
+  translate([total_wall / 2, total_wall / 2, 0])
     zrot_copies([0, 90], r = total_wall/2)
     cyl(side_length - (total_wall*2), r=radius, fillet=radius, orient=ORIENT_X, center=false);
 }
@@ -321,93 +320,92 @@ module interlock() {
 // indent indicates that one side of the slot will be closed off
 // so that only one side of filament needs to be sealed
 module add_filament_hinge() {
-    if (hinge_type == "filament") {
-        difference() {
-            children(0);
-            // this movement closes off one side of the outside hinge, so the filament only needs
-            // to be secured on one side, it does not affect the inside hinge.
-            zmove(wall_thickness)
-            cylinder(side_length, d=hinge_filament_hole);
-        }
-    } else {
-        children();
+  if (hinge_type == "filament") {
+    difference() {
+      children(0);
+      // this movement closes off one side of the outside hinge, so the filament only needs
+      // to be secured on one side, it does not affect the inside hinge.
+      zmove(wall_thickness)
+        cylinder(side_length, d=hinge_filament_hole);
     }
+  } else {
+    children();
+  }
 }
 
 module add_ball_hinge(indent=true) {
-    if (hinge_type == "ball") {
-        if (indent) {
-            diameter = hinge_ball + hinge_ball_clearance;
-            copy_offset = (hinge_inside_length + (diameter/2 * hinge_ball_pullback)) / 2;
-            difference() {
-               children(0);
-               zmove(side_length/2) zflip_copy(offset=copy_offset) sphere(d=diameter);
-            }
-        } else {
-            diameter = hinge_ball;
-            movement = (diameter/2) * hinge_ball_pullback;
-            union() {
-               children(0);
-               zmove(movement) sphere(d=diameter);
-            }
-        }
+  if (hinge_type == "ball") {
+    if (indent) {
+      diameter = hinge_ball + hinge_ball_clearance;
+      copy_offset = (hinge_inside_length + (diameter/2 * hinge_ball_pullback)) / 2;
+      difference() {
+        children(0);
+        zmove(side_length/2) zflip_copy(offset=copy_offset) sphere(d=diameter);
+      }
     } else {
-        children();
+      diameter = hinge_ball;
+      movement = (diameter/2) * hinge_ball_pullback;
+      union() {
+        children(0);
+        zmove(movement) sphere(d=diameter);
+      }
     }
+  } else {
+    children();
+  }
 }
 
 module hinge_shape_top() {
-    // covers top half of the circle, to connect the circle to the square above it
-    // also moves half the distance through the section above it, allowing us to get rid of an unwanted rounded corner there
-    ymove(hinge_depth/2) square([hinge_depth, hinge_depth], true);
-    circle(d=hinge_depth);
+  // covers top half of the circle, to connect the circle to the square above it
+  // also moves half the distance through the section above it, allowing us to get rid of an unwanted rounded corner there
+  ymove(hinge_depth/2) square([hinge_depth, hinge_depth], true);
+  circle(d=hinge_depth);
 }
 
 module hinge_shape_bottom() {
-    // top inside corner, where the circle needs to be joined to the box corner
-    square([hinge_depth/2, hinge_depth/2]);
+  // top inside corner, where the circle needs to be joined to the box corner
+  square([hinge_depth/2, hinge_depth/2]);
 
-    // the circle that defines the center of rotation, and size of the hinge
-    circle(d=hinge_depth);
+  // the circle that defines the center of rotation, and size of the hinge
+  circle(d=hinge_depth);
 
-    // now create a smooth transition from the outermost apex of the circle
-    // down to the body of the part
-    intersection() {
-        // this square covers the bottom half of the circle, where we want to add a bottom support to the circle
-        ymove(-hinge_depth/2) square([hinge_depth, hinge_depth], center=true);
+  // now create a smooth transition from the outermost apex of the circle
+  // down to the body of the part
+  intersection() {
+    // this square covers the bottom half of the circle, where we want to add a bottom support to the circle
+    ymove(-hinge_depth/2) square([hinge_depth, hinge_depth], center=true);
 
-        // now a double-sized circle that is translated over, so that the outermost apex of both circles are aligned
-        move(x=hinge_depth/2) circle(r=hinge_depth);
-    }
+    // now a double-sized circle that is translated over, so that the outermost apex of both circles are aligned
+    move(x=hinge_depth/2) circle(r=hinge_depth);
+  }
 }
 
 module hinge_knuckle_outside(extended=true) {
-    add_filament_hinge() {
-        union() {
-            zmove(side_length/2)
-            mirror_copy(offset=(side_length/2) - hinge_wing)
-            add_ball_hinge(indent=false)
-            linear_extrude(hinge_wing) hinge_shape_bottom();
+  add_filament_hinge() {
+    union() {
+      zmove(side_length/2)
+        mirror_copy(offset=(side_length/2) - hinge_wing)
+        add_ball_hinge(indent=false)
+        linear_extrude(hinge_wing) hinge_shape_bottom();
 
+      if (extended) {
+        // now we take a projection of the side that goes against the body of the piece
+        // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
+        distance = min(wall_thickness, radius);
 
-            if (extended) {
-                // now we take a projection of the side that goes against the body of the piece
-                // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
-                distance = min(wall_thickness, radius);
-
-                move(z=side_length, x=hinge_depth/2)
-                rotate([90,90,90])
-                linear_extrude(distance)
-                projection() yrot(90) hinge_knuckle_outside(extended=false);
-            }
-        }
+        move(z=side_length, x=hinge_depth/2)
+          rotate([90,90,90])
+          linear_extrude(distance)
+          projection() yrot(90) hinge_knuckle_outside(extended=false);
+      }
     }
+  }
 }
 
 module hinge_knuckle_inside(flat_hinge=false) {
-    ymove(-hinge_lid_clearance)
+  ymove(-hinge_lid_clearance)
     add_filament_hinge() {
-        add_ball_hinge(indent=true)
+      add_ball_hinge(indent=true)
         zmove(side_length/2)
         mirror_copy(offset=-side_length/2)
         zmove(hinge_wing + hinge_clearance)
@@ -415,23 +413,23 @@ module hinge_knuckle_inside(flat_hinge=false) {
         hinge_shape_top();
     }
 
-    // not entirely sure on the nicest rounding options, but I'll go with this for now.
-    round_edges = flat_hinge ? [[1,1,1,1], [0,0,0,0], [0,1,1,0]] : EDGES_Z_LF;
-    cube_thickness = flat_hinge ? total_wall : total_wall + hinge_lid_slot_extra_clearance;
+  // not entirely sure on the nicest rounding options, but I'll go with this for now.
+  round_edges = flat_hinge ? [[1,1,1,1], [0,0,0,0], [0,1,1,0]] : EDGES_Z_LF;
+  cube_thickness = flat_hinge ? total_wall : total_wall + hinge_lid_slot_extra_clearance;
 
-    // add base that will be added to the flat corner
-    move(x=-hinge_depth/2, y=hinge_depth/2)
-    cuboid([hinge_depth + radius,cube_thickness,side_length], fillet=radius, edges=round_edges, center=false);
+  // add base that will be added to the flat corner
+  move(x=-hinge_depth/2, y=hinge_depth/2)
+  cuboid([hinge_depth + radius,cube_thickness,side_length], fillet=radius, edges=round_edges, center=false);
 }
 
 
 module lid_corner_hinge() {
-    // just visual positioning
-    zmove(hinge_depth) yrot(270)
+  // just visual positioning
+  zmove(hinge_depth) yrot(270)
 
     union() {
-        lid_corner();
-        zflip() xrot(270) move(x=-hinge_depth/2, y=-(hinge_depth)/2) hinge_knuckle_inside();
+      lid_corner();
+      zflip() xrot(270) move(x=-hinge_depth/2, y=-(hinge_depth)/2) hinge_knuckle_inside();
     }
 }
 
@@ -439,85 +437,85 @@ module lid_corner_hinge() {
 // this is the top corner piece of the box, with a hinge attached to it
 // this piece coins with a `lid_corner_hinge` piece
 module top_corner_hinge() {
-    union() {
-        top_corner();
-        xrot(270) move(x=-hinge_depth/2, y=-(hinge_depth)/2) hinge_knuckle_outside();
+  union() {
+    top_corner();
+    xrot(270) move(x=-hinge_depth/2, y=-(hinge_depth)/2) hinge_knuckle_outside();
 
-        // now we take a projection of the side that goes against the corner piece
-        // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
+    // now we take a projection of the side that goes against the corner piece
+    // we then extrude and position it, in order to remove unwanted rounded corners at the connection point
 
-    }
+  }
 }
 
 // tall is passed as a variable here because the function is used internally, as well as to create
 // the edge cap part that looks at the edge_cap_tall variable, and passes it into here
 module edge_cap(length=side_length, height=height, tall=false) {
-    difference() {
-        cap_height = tall ? height + wall_thickness : height;
-        cuboid([total_wall,length,cap_height], fillet=radius, edges=EDGES_Z_ALL, center=false);
+  difference() {
+    cap_height = tall ? height + wall_thickness : height;
+    cuboid([total_wall,length,cap_height], fillet=radius, edges=EDGES_Z_ALL, center=false);
 
-        // the - .5 and the + 1 are to get rid of the visual artifact from the OpenSCAD difference implementation when the items share an outside plane
-        z_offset = tall ? wall_thickness * 2 : wall_thickness;
-        translate([wall_thickness, -.5, z_offset])
-        cube([slot_thickness, length + 1, height]);
-    }
+    // the - .5 and the + 1 are to get rid of the visual artifact from the OpenSCAD difference implementation when the items share an outside plane
+    z_offset = tall ? wall_thickness * 2 : wall_thickness;
+    translate([wall_thickness, -.5, z_offset])
+      cube([slot_thickness, length + 1, height]);
+  }
 }
 
 module flat_hinge_lid() {
-    // rotate into printable orientation
-    zmove(hinge_depth) yrot(270)
+  // rotate into printable orientation
+  zmove(hinge_depth) yrot(270)
 
     union() {
-        zmove(total_wall) rotate([0, 90]) edge_cap(length=side_length, height=total_wall);
-        zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_inside(flat_hinge=true);
+      zmove(total_wall) rotate([0, 90]) edge_cap(length=side_length, height=total_wall);
+      zflip() xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_inside(flat_hinge=true);
     }
 }
 
 
 module flat_hinge_knuckle_outside() {
-    union() {
-        edge_cap(length=side_length, height=height);
-        xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_outside();
-    }
+  union() {
+    edge_cap(length=side_length, height=height);
+    xrot(270) move(x=-hinge_depth/2, y=-hinge_depth/2) hinge_knuckle_outside();
+  }
 }
 
 
 // the lid latch part attaches to the lid of the box
 // and is meant to snap onto an edge_cap piece
 module lid_latch() {
-    if (latch_include_edge_cap) {
-        xmove(-total_wall - bed_spacing)
-        edge_cap(length=latch_edge_cap_length, height=total_wall);
-    }
+  if (latch_include_edge_cap) {
+    xmove(-total_wall - bed_spacing)
+      edge_cap(length=latch_edge_cap_length, height=total_wall);
+  }
 
-    union() {
-        edge_cap(length=latch_edge_cap_length, height=total_wall);
+  union() {
+    edge_cap(length=latch_edge_cap_length, height=total_wall);
 
-        move(x=total_wall-wall_thickness, y=(latch_edge_cap_length + latch_length)/2)
-        xrot(90)
-        linear_extrude(latch_length) {
-            lid_latch_shape();
-        }
-    }
+    move(x=total_wall-wall_thickness, y=(latch_edge_cap_length + latch_length)/2)
+      xrot(90)
+      linear_extrude(latch_length) {
+        lid_latch_shape();
+      }
+  }
 }
 
 module lid_latch_shape() {
-    // in the way we have it oriented, you can think of the polygon coordinates as [x, z, rounding]
-    polygon(
-        polyRound([
-            // start at bottom of edge cap, right where the slot ends
-            [0,0,0],
-            // move to the bottom end of the latch
-            [total_wall * 2 + wall_thickness, 0, 0.2],
-            // come up and over a bit, towards the ledge, providing a nice rounding point
-            [total_wall * 2, wall_thickness * .9, 1],
-            // this creates the latching point, where the corner slips over the edge cap
-            [total_wall + wall_thickness + latch_clearance, wall_thickness * 1.7, .2],
-            // the bottom of the latching point. Coming back a tiny bit here to create a negative slope.
-            [total_wall + wall_thickness + latch_clearance + .2, wall_thickness, 0],
-            // end at corner of slot, right above the start point
-            [0, wall_thickness, 0],
-        ])
+  // in the way we have it oriented, you can think of the polygon coordinates as [x, z, rounding]
+  polygon(
+      polyRound([
+        // start at bottom of edge cap, right where the slot ends
+        [0,0,0],
+        // move to the bottom end of the latch
+        [total_wall * 2 + wall_thickness, 0, 0.2],
+        // come up and over a bit, towards the ledge, providing a nice rounding point
+        [total_wall * 2, wall_thickness * .9, 1],
+        // this creates the latching point, where the corner slips over the edge cap
+        [total_wall + wall_thickness + latch_clearance, wall_thickness * 1.7, .2],
+        // the bottom of the latching point. Coming back a tiny bit here to create a negative slope.
+        [total_wall + wall_thickness + latch_clearance + .2, wall_thickness, 0],
+        // end at corner of slot, right above the start point
+        [0, wall_thickness, 0],
+      ])
     );
 }
 
@@ -528,105 +526,127 @@ module lid_latch_shape() {
 bed_spacing = 2;
 
 module corner_hinge_set() {
-    yflip_copy() ymove(-bed_spacing - side_length) {
-        xmove(-hinge_depth * 2 - bed_spacing)
-        yflip() ymove(-side_length)
-        lid_corner_hinge();
-        top_corner_hinge();
-    }
+  yflip_copy() ymove(-bed_spacing - side_length) {
+    xmove(-hinge_depth * 2 - bed_spacing)
+      yflip() ymove(-side_length)
+      lid_corner_hinge();
+    top_corner_hinge();
+  }
 
-    move(y=-side_length/2, x=total_wall * 2 + bed_spacing)
+  move(y=-side_length/2, x=total_wall * 2 + bed_spacing)
     yrot(270) lid_corner();
 
-    move(y=side_length/2, x=total_wall * 3 + bed_spacing * 2)
+  move(y=side_length/2, x=total_wall * 3 + bed_spacing * 2)
     yflip() yrot(270) lid_corner();
-
 }
 
 module flat_hinge_set() {
-    xdistribute(hinge_depth * 2 + bed_spacing) {
-        ymove(side_length) yflip() flat_hinge_lid();
-        flat_hinge_knuckle_outside();
-    }
+  xdistribute(hinge_depth * 2 + bed_spacing) {
+    ymove(side_length) yflip() flat_hinge_lid();
+    flat_hinge_knuckle_outside();
+  }
 }
 
 
 module bottom_corners(spacing=bed_spacing) {
-    distance = (side_length) + spacing;
-    xdistribute(-side_length * 2 - spacing) {
-        xflip() yflip_copy(offset=-distance) bottom_corner();
-        yflip_copy(offset=-distance) bottom_corner(magnets=true);
-    }
+  distance = (side_length) + spacing;
+  xdistribute(-side_length * 2 - spacing) {
+    xflip() yflip_copy(offset=-distance) bottom_corner();
+    yflip_copy(offset=-distance) bottom_corner(magnets=true);
+  }
 }
 
 // `magnets` determinse whether magnets sholuld be shown, but only if the master magnets_on is also true.
 module top_corner_pair(magnets=false, close=false) {
-    // this is implemented to mirror the parts so that magnetic parts are correctly printed
-    total_length = close ? (side_length + total_wall + bed_spacing) : (side_length + (total_wall + bed_spacing)*2);
-    move(x=-total_length/2, y= -side_length/2) {
-        move(x=total_length, y=side_length) yflip() zrot(90) top_corner(magnets=magnets);
-        top_corner(magnets=magnets);
-    }
+  // this is implemented to mirror the parts so that magnetic parts are correctly printed
+  total_length = close ? (side_length + total_wall + bed_spacing) : (side_length + (total_wall + bed_spacing)*2);
+  move(x=-total_length/2, y= -side_length/2) {
+    move(x=total_length, y=side_length) yflip() zrot(90) top_corner(magnets=magnets);
+    top_corner(magnets=magnets);
+  }
 }
 module top_corner_set() {
-    top_corner_pair();
-    zrot(90) top_corner_pair(magnets=true);
+  top_corner_pair();
+  zrot(90) top_corner_pair(magnets=true);
 }
 
 
 quadrant_spacing = side_length * 2 + bed_spacing * 6;
 
 if (print_parts == "tray") {
-    ydistribute(quadrant_spacing) {
+  ydistribute(quadrant_spacing) {
 
-        bottom_corners();
-        top_corner_set();
-    }
+    bottom_corners();
+    top_corner_set();
+  }
 }
 
 if (print_parts == "box with hinged lid") {
-    ydistribute(quadrant_spacing) {
-        union() {
-            bottom_corners(total_wall);
-            zrot(45) top_corner_pair(magnets=true, close=true);
-        }
-        corner_hinge_set();
+  ydistribute(quadrant_spacing) {
+    union() {
+      bottom_corners(total_wall);
+      zrot(45) top_corner_pair(magnets=true, close=true);
     }
+    corner_hinge_set();
+  }
 }
 
 if (print_parts == "top corner pair") {
-    top_corner_pair(magnets=true, close=true);
+  top_corner_pair(magnets=true, close=true);
 }
 
 if (print_parts == "top corner set") {
-    top_corner_set();
+  top_corner_set();
 }
 
 if (print_parts == "bottom corners") {
-    bottom_corners();
+  bottom_corners();
 }
 
 if (print_parts == "3-way divider") {
-    3_way();
+  3_way();
 }
 
 if (print_parts == "4-way divider") {
-    4_way();
+  4_way();
 }
 
 if (print_parts == "hinges only — corners") {
-    corner_hinge_set();
+  corner_hinge_set();
 }
 
 if (print_parts == "hinges only — flat") {
-    ymove(-side_length/2) flat_hinge_set();
+  ymove(-side_length/2) flat_hinge_set();
 }
 
 if (print_parts == "edge cap") {
-    ymove(-edge_cap_length/2) edge_cap(height=total_wall, length=edge_cap_length, tall=edge_cap_tall);
+  ymove(-edge_cap_length/2) edge_cap(height=total_wall, length=edge_cap_length, tall=edge_cap_tall);
 }
 
 if (print_parts == "lid latch") {
-    lid_latch();
+  lid_latch();
 }
+
+
+//top_corner();
+//bottom_corner();
+
+//4_way();
+
+
+//xmove(-hinge_depth * 2 - bed_spacing)
+//yflip()
+//lid_corner_hinge();
+//yflip()
+//top_corner_hinge();
+
+
+
+//lid_corner();
+//
+//flat_hinge_set();
+
+//edge_cap(height=total_wall, length=edge_cap_length, tall=edge_cap_tall);
+
+//lid_latch();
 
