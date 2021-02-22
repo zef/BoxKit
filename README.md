@@ -1,17 +1,18 @@
 # BoxKit
 
-A library of 3d printable parts for making low-cost boxes, trays, and bins.
+An open-source library of 3d printable parts for making low-cost boxes, trays,
+and bins.
 
 
 3d printing can be a great way to make small bins and boxes, but it's not
-always possible or economical to use for larger items.
+always possible or economical for larger items.
 
 BoxKit enables the easy creation of these types of bins using thin sheet goods
 such as acrylic, plywood, or MDF panels, with small, cheap, 3d printed parts
 for the corners. The corners can be secured in place with CA glue.
 
 This is a quick, cheap, and efficient way of creating all sorts of small parts
-bins.
+bins. The parts are designed to print with no supports.
 
 I would like to make a video explaining and demonstrating some of the features
 and process. Coming soon, I hope!
@@ -69,6 +70,11 @@ beyond a simple monetary calculation, though it can also be very economical.
 
 All dimensions are in mm.
 
+Two of the most important parameters are:
+- `stock thickness`, which represents the thickness of the material that you are using
+- `perimeters`, which is used — along with `extrusion width` — to determine the
+  thickness of the plastic walls that make up the structure of plastic part.
+
 The wall thickness of the plastic is determined by the number of perimeters set
 in the configuration, multiplied by the extrusion width. I have been pleasantly
 surprised by the strength and suitability of using only two perimeters, but I
@@ -88,6 +94,19 @@ print just that, if desired.
 
 ![BoxKit Configuration Options](/BoxKit-Customization.png?raw=true)
 
+
+
+#### Printing Notes
+
+My parts are printed with PETG:
+- white is [MatterHackers Build series](https://www.matterhackers.com/store/l/petg-white-high-strength-filament-1.75mm/sk/M1VF5877)
+- black is [Prusament Galaxy Black](https://shop.prusa3d.com/en/prusament/1006-prusament-petg-prusa-galaxy-black-1kg.html)
+
+
+With PETG, I have personally found it essential to slow down the first-layer
+speed to get good adhesion and a clean first layer. I could not get consistent
+results using the default Prusa Slicer profiles. I am using a 10mm/s First layer
+speed, and that is working well for me.
 
 
 ### Cutting Panels
@@ -164,6 +183,9 @@ two covers for the front of the lid.
 ## Options and Accessories
 
 ### Hinges
+
+The hinges are designed to open to a nice stop point, so the lid opens to about
+30º past 90º.
 
 The hinge type can be configured as:
 
