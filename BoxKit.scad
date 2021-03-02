@@ -5,9 +5,13 @@
 
 
 // https://github.com/Irev-Dev/Round-Anything
+//
+// Installation instructions: https://github.com/Irev-Dev/Round-Anything/discussions/21
 include <Round-Anything/polyround.scad>
 
 // https://github.com/revarbat/BOSL/wiki
+//
+// Installation instructions: https://github.com/revarbat/BOSL/wiki
 include <BOSL/constants.scad>
 use <BOSL/transforms.scad>
 use <BOSL/shapes.scad>
