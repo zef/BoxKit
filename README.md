@@ -1,8 +1,7 @@
 # BoxKit
 
 An open-source library of 3d printable parts for making low-cost boxes, trays,
-and bins.
-
+and bins. You can also view pictures and download the source from [the BoxKit page on Prusa Printers](https://www.prusaprinters.org/prints/57813-boxkit-parts-for-making-custom-boxes-trays-and-bin).
 
 3d printing can be a great way to make small bins and boxes, but it's not
 always possible or economical for larger items.
@@ -128,8 +127,8 @@ little tricky to keep them on properly. See the "ledge height" option in the
 "Bottom Corners" customizer section for another option that holds the sidewalls
 better.
 
-For gluing, I have used both [medium](https://amzn.to/2NJgU8P) or
-[thick](https://amzn.to/3s0rSW3) 2P-10 CA glue and they both work well. Medium
+For gluing, I have used both [medium](https://amzn.to/3J4RF8L) or
+[thick](https://amzn.to/3pZprVb) 2P-10 CA glue and they both work well. Medium
 can be quite runny and you have to be careful to not let it drip, but it's
 slightly easier for me to work with than the thick. I try to apply a small
 amount to the cavity of the part and then press in the panel. Thick tends to
@@ -240,7 +239,7 @@ Boxes are easily created by building a hinge into the top corner piece, but a
 ### Magnets!
 
 Magnets can be embedded in the rear parts of a box. In a brief test using four
-8mm diameter, 1mm thick magnets [such as these](https://amzn.to/3sdyssC), a
+8mm diameter, 1mm thick magnets [such as these](https://amzn.to/34ANB0N), a
 small box was able to hold some small items and remain stuck to the side of my
 fridge, but it was not particularly strong with such small magnets. Perhaps
 doubling the magnets or using a larger magnet would work well. Note that you may
